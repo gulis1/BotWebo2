@@ -1,0 +1,5 @@
+.idea
+venv
+serverAudio
+.env
+**/__pycache__

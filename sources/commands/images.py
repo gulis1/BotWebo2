@@ -1,0 +1,50 @@
+import discord
+from discord.ext import commands
+
+images = {"no": "https://cdn.discordapp.com/attachments/734750766895595581/843267512022859816/no.gif",
+          "yes": "https://cdn.discordapp.com/attachments/734750766895595581/843267625975021568/yes.gif",
+          "haachama": "https://cdn.discordapp.com/attachments/734750766895595581/843267894686908442/haachama.jpg",
+          "pekora": "https://cdn.discordapp.com/attachments/734750766895595581/843268060445016105/pekora.jpg",
+          "smug": "https://cdn.discordapp.com/attachments/734750766895595581/843268167089258517/smug.jpg",
+          "pray": "https://cdn.discordapp.com/attachments/649025469219340288/853772957028319292/unknown.png"
+          }
+
+
+class Images(commands.Cog):
+
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    @commands.command()
+    async def no(self, context):
+        await context.message.channel.send(images["no"])
+        await context.message.delete()
+
+    @commands.command()
+    async def yes(self, context):
+        await context.message.channel.send(images["yes"])
+        await context.message.delete()
+
+    @commands.command()
+    async def haachama(self, context):
+        await context.message.channel.send(images["haachama"])
+        await context.message.delete()
+
+    @commands.command()
+    async def pekora(self, context):
+        await context.message.channel.send(images["pekora"])
+        await context.message.delete()
+
+    @commands.command()
+    async def smug(self, context):
+        await context.message.channel.send(images["smug"])
+        await context.message.delete()
+
+    @commands.command()
+    async def pray(self, context):
+        await context.message.channel.send(images["pray"])
+        await context.message.delete()
+
+
+def setup(bot: commands.Bot):
+    bot.add_cog(Images(bot))
