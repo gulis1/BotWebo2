@@ -1,3 +1,4 @@
+certifi
 discord
 discord.py[voice]
 spotify

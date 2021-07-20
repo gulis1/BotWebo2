@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONPATH=/BotWebo2/
 
 RUN apt update \
-    && apt install -y --no-install-recommends python python3-pip ffmpeg libsodium-dev libffi-dev python3-dev build-essential ca-certificates
+    && apt install -y --no-install-recommends python python3-pip ffmpeg libsodium-dev libffi-dev python3-dev build-essential
     
 COPY . /BotWebo2
 
