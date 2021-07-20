@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONPATH=/BotWebo2/
 
 RUN apt update \
-    && apt install -y --no-install-recommends make cmake gcc python python3-pip ffmpeg
+    && apt install -y --no-install-recommends make cmake python python3-pip ffmpeg
     
 COPY . /BotWebo2
 

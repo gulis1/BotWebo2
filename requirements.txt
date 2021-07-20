@@ -1,5 +1,5 @@
 discord
-discord.py[voice]
+--no-use-pep517 discord.py[voice]
 spotify
 youtube-dl
 python-dotenv
