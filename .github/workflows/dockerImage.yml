@@ -9,9 +9,7 @@ on:
 jobs:
 
   build-image:
-
       runs-on: ubuntu-latest
-
       steps:
         - name: Set up QEMU
           uses: docker/setup-qemu-action@v1
@@ -23,7 +21,7 @@ jobs:
           uses: docker/login-action@v1 
           with:
             username: ${{ secrets.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_TOKEN }}
+            password: ${{ secrets.DOCKERHUB_TOKEN}}
         
         - name: Build and push image.
           id: docker_build
@@ -31,6 +29,7 @@ jobs:
           with:
             push: true
             tags: gulis1/botwebo2:latest
+            file: ./docker/Dockerfile
         
         - name: Image digest
           run: echo ${{ steps.docker_build.outputs.digest }}
