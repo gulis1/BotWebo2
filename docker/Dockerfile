@@ -12,6 +12,7 @@ WORKDIR /BotWebo2
 
 RUN python3 -m pip install -U pip \
     && apt install -y python-dev \
+    && apt install -y build-essential \
     && SODIUM_INSTALL=system pip install pynacl \
     && pip install -r requirements.txt  \
     && chmod +x ./docker/startContainer.sh \
