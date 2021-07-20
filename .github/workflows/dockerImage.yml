@@ -28,7 +28,7 @@ jobs:
           uses: docker/build-push-action@v2
           with:
             push: true
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/arm64
             tags: gulis1/botwebo2:latest
             file: ./docker/Dockerfile
         
