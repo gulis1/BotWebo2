@@ -10,7 +10,8 @@ COPY . /BotWebo2
 
 WORKDIR /BotWebo2
 
-RUN pip install -r requirements.txt  \
+RUN python3 -m pip install -U pip
+    && pip install -r requirements.txt  \
     && chmod +x ./docker/startContainer.sh \
     && chmod +x ./sources/main.py
 
