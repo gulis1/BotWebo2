@@ -11,8 +11,8 @@ COPY . /BotWebo2
 WORKDIR /BotWebo2
 
 RUN python3 -m pip install -U pip \
-    && apt install -y python-dev build-essential libxml2-dev libxslt-dev\
-    && SODIUM_INSTALL=system pip install pynacl \
+    && apt install -y python-dev build-essential \
+    && SODIUM_INSTALL=system pip install pynacl --no-use-pep517 \
     && pip install -r requirements.txt  \
     && chmod +x ./docker/startContainer.sh \
     && chmod +x ./sources/main.py
