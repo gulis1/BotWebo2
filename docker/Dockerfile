@@ -14,7 +14,9 @@ RUN python3 -m pip install -U pip \
     && SODIUM_INSTALL=system pip install pynacl \
     && pip install -r requirements.txt  \
     && chmod +x ./docker/startContainer.sh \
-    && python3 ./docker/InstallCertificates.command\
+    && python3 ./docker/InstallCertificates.command \
+    && apt remove -y libffi-dev python3-dev build-essential \
+    && apt autoremove \
     && chmod +x ./sources/main.py
 
 ENTRYPOINT ["./docker/startContainer.sh"]
