@@ -21,7 +21,7 @@ Supports searching by name, youtube videos and playlist and spotify playlists an
 
 * /sauce (url)              Finds the source for the image in the url.
 
-To find the source for an image in your computer, send the image with /sauce comment.
+To find the source for an image in your computer, send the image with "/sauce" as the comment.
 
 ### Anilist commands
 
