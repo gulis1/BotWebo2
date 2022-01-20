@@ -1,8 +1,7 @@
-import asyncio
 from random import shuffle
 from time import time
 from os import getenv
-from asyncio import sleep
+from asyncio import sleep, get_event_loop
 from os import remove
 import yt_dlp
 from spotify import HTTPClient
@@ -261,7 +260,7 @@ class GuildInstance:
             except FileNotFoundError:
                 pass
 
-            loop = asyncio.get_event_loop()
+            loop = get_event_loop()
             await loop.run_in_executor(None, downloadSong, self.currentSong.id, path)
 
         try:
