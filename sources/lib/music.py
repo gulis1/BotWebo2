@@ -1,10 +1,10 @@
+import asyncio
 from random import shuffle
 from time import time
 from os import getenv
 from asyncio import sleep
 from os import remove
-import youtube_dl
-from threading import Thread
+import yt_dlp
 from spotify import HTTPClient
 import discord
 
@@ -261,12 +261,8 @@ class GuildInstance:
             except FileNotFoundError:
                 pass
 
-
-            p1 = Thread(target=downloadSong, args=(self.currentSong.id, path))
-            p1.start()
-
-            while p1.is_alive():
-                await sleep(3)
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(None, downloadSong, self.currentSong.id, path)
 
         try:
             self.voiceClient.play(discord.FFmpegPCMAudio(path))
@@ -330,7 +326,7 @@ def downloadSong(videoId: str, path: str) -> None:
 
     ydl_opts = {'format': 'bestaudio/best', 'quiet': False, 'noplaylist': True, "outtmpl": path}
 
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])  # Download into the current working directory
 
 
