@@ -15,6 +15,6 @@ class Newsletter:
         data = xml.parse(response)['feed']['entry']
 
         articles = list(takewhile(lambda x: self.__last_time < datetime.fromisoformat(x['published'][:-1]), data))
-
+        self.__last_time = datetime.utcnow()
         print(f'{datetime.now()}: {len(articles)} new articles.')
         return articles
