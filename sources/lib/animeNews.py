@@ -6,7 +6,6 @@ from os import getenv
 
 tiny_token = getenv('TINY_URL')
 
-
 class Newsletter:
 
     def __init__(self):
