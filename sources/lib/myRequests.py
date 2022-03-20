@@ -25,11 +25,18 @@ async def getStringResponse(url: str) -> str:
     return content
 
 
-async def postJson(url: str, **kwargs):
-    content = None
+async def postJson(url: str, headers=None, **kwargs):
 
+    if headers is None:
+        headers = {}
+
+    content = None
     async with aiohttp.ClientSession() as session:
-        r = await session.post(url, json=kwargs)
+
+        for key, value in headers.items():
+            session.headers.add(key, value)
+
+        r = await session.post(url, json=kwargs['body'])
         return {"status": r.status, "content": await r.json()}
 
 

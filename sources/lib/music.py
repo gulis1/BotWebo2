@@ -95,7 +95,7 @@ class GuildInstance:
             f"https://www.googleapis.com/youtube/v3/playlistItems?key={yt_key}&part=snippet,contentDetails&maxResults=30&playlistId={youtube_id}")
 
         video_list = [Video(vid["snippet"]["resourceId"]["videoId"], vid["snippet"]["title"]) for vid in
-                      results["items"]]
+                      results["items"] if vid["snippet"]["title"] != 'Deleted video' and vid["snippet"]["title"] != 'Private video']
 
         if shuffled:
             shuffle(video_list)

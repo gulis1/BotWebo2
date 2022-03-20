@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from sources.lib.animeNews import Newsletter
 
+
 class News(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
