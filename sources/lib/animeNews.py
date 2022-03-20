@@ -10,7 +10,7 @@ class Newsletter:
 
     def __init__(self):
         self.__last_time = datetime.utcnow()
-        self.__source = "https://www.animenewsnetwork.com/all/atom.xml"
+        self.__source = "https://www.animenewsnetwork.com/news/atom.xml"
 
     async def query_news(self):
 
