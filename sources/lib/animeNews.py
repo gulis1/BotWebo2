@@ -22,7 +22,7 @@ class Newsletter:
 
         articles = list(takewhile(lambda x: self.__last_time < datetime.fromisoformat(x['published'][:-1]), data))
 
-        # Shorten retrieved article's links.
+        # Shorten retrieved articles' links.
         for article in articles:
             link = article['link']['@href']
             response = await postJson('https://api.tinyurl.com/create', headers={'Authorization': f'Bearer {tiny_token}'}, url=link)
