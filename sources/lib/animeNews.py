@@ -33,5 +33,5 @@ class Newsletter:
                 article['link']['@href'] = response['content']['data']['tiny_url']
 
         self.__last_time = datetime.fromisoformat(data[0]['published'][:-1])
-        print(f'{self.__last_time}: {len(articles)} new articles.')
+        print(f'{datetime.now()}: {len(articles)} new articles found. Last one: {self.__last_time}')
         return articles
