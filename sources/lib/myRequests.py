@@ -25,7 +25,7 @@ async def getStringResponse(url: str) -> str:
     return content
 
 
-async def postJson(url: str, headers=None, **kwargs):
+async def postJson(_url: str, headers=None, **kwargs):
 
     if headers is None:
         headers = {}
@@ -36,7 +36,7 @@ async def postJson(url: str, headers=None, **kwargs):
         for key, value in headers.items():
             session.headers.add(key, value)
 
-        r = await session.post(url, json=kwargs['body'])
+        r = await session.post(_url, json=kwargs)
         return {"status": r.status, "content": await r.json()}
 
 

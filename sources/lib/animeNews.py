@@ -25,7 +25,7 @@ class Newsletter:
         # Shorten retrieved article's links.
         for article in articles:
             link = article['link']['@href']
-            response = await postJson('https://api.tinyurl.com/create', headers={'Authorization': f'Bearer {tiny_token}'}, body={'url': link})
+            response = await postJson('https://api.tinyurl.com/create', headers={'Authorization': f'Bearer {tiny_token}'}, url=link)
 
             if response['status'] != 200:
                 print('Error with tiny-url api')
