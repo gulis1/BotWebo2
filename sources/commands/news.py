@@ -19,16 +19,19 @@ class News(commands.Cog):
 
         for article in news:
 
-            categories = article['category']
-            if type(categories) != list:
-                categories = [categories]
+            try:
+                categories = article['category']
+                if type(categories) != list:
+                    categories = [categories]
 
-            for cat in categories:
-                if cat['@term'] == 'Anime':
-                    anime_news.append(article)
+                for cat in categories:
+                    if cat['@term'] == 'Anime':
+                        anime_news.append(article)
 
-                elif cat['@term'] == 'Manga':
-                    manga_news.append(article)
+                    elif cat['@term'] == 'Manga':
+                        manga_news.append(article)
+            except KeyError:
+                pass
 
         anime_news = [x['link']['@href'] for x in anime_news]
         manga_news = [x['link']['@href'] for x in manga_news]
