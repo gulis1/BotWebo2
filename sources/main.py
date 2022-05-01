@@ -6,7 +6,7 @@ from os import getenv
 
 intents = Intents.default()
 intents.members = True
-bot = commands.Bot("/", intents=intents)
+bot = commands.Bot(";", intents=intents)
 
 
 @bot.event
