@@ -18,7 +18,6 @@ spotifyClient = HTTPClient(spotifyClientId, spotifySecretId)
 MAX_SONGS = 30
 MAX_VIDEO_DURATION = 900
 
-
 COLOR_RED = discord.Color.red()
 COLOR_GREEN = discord.Color.green()
 
@@ -45,6 +44,7 @@ class GuildInstance:
         self.searchResults = []
         self.loop: int = 0
         self.currentSong: Video or None = None
+        self.data = {"youtube_id": "", "nextPageToken": ""}
 
     def emptyPlaylist(self):
         self.playlist = []
@@ -93,7 +93,16 @@ class GuildInstance:
 
         results = await getJsonResponse(
             f"https://www.googleapis.com/youtube/v3/playlistItems?key={yt_key}&part=snippet,contentDetails&maxResults=30&playlistId={youtube_id}")
+        self.data["youtube_id"] = youtube_id;
+        await self.fillPlaylist(results,shuffled);
 
+    async def getNextPageYoutube(self):
+        print(self.data)
+        results = await getJsonResponse(
+            f"https://www.googleapis.com/youtube/v3/playlistItems?pageToken={self.data['nextPageToken']}&key={yt_key}&part=snippet,contentDetails&maxResults=30&playlistId={self.data['youtube_id']}")
+        await self.fillPlaylist(results,False);
+
+    async def fillPlaylist(self,results,shuffled:bool):
         video_list = [Video(vid["snippet"]["resourceId"]["videoId"], vid["snippet"]["title"]) for vid in
                       results["items"] if vid["snippet"]["title"] != 'Deleted video' and vid["snippet"]["title"] != 'Private video']
 
@@ -106,8 +115,13 @@ class GuildInstance:
             cont += 1
             if len(self.playlist) >= 30:
                 break
+        try:
+            self.data["nextPageToken"] = results["nextPageToken"]
+        except:
+            self.data["nextPageToken"] = ""
 
-        await self.textChannel.send(embed=discord.Embed(title=f"{cont} song(s) where added to the playlist.", colour=COLOR_GREEN))
+        await self.textChannel.send(
+            embed=discord.Embed(title=f"{cont} song(s) where added to the playlist.", colour=COLOR_GREEN))
 
     async def findYoutubeEquivalent(self):
 
@@ -212,6 +226,8 @@ class GuildInstance:
                     if len(self.playlist) > 0 or self.loop == 1:
                         await self.playSong()
 
+                    elif self.data["nextPageToken"] != "":
+                        await self.getNextPageYoutube()
                     else:
                         reason = "Playlist is empty."
 
