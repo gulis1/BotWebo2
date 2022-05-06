@@ -219,7 +219,7 @@ class GuildInstance:
                         await self.playSong()
 
                     elif self.data["nextPageToken"] != "":
-                        await self.getYoutubePlaylist(self.data["playlist_id"], True)
+                        await self.getYoutubePlaylist(self.data["playlist_id"])
                     else:
                         reason = "Playlist is empty."
 
