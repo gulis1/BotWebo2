@@ -44,7 +44,7 @@ class GuildInstance:
         self.searchResults = []
         self.loop: int = 0
         self.currentSong: Video or None = None
-        self.data = {"youtube_id": "", "nextPageToken": ""}
+        self.data = {"playlist_id": "", "nextPageToken": ""}
 
     def emptyPlaylist(self):
         self.playlist = []
@@ -89,23 +89,12 @@ class GuildInstance:
         except IndexError:
             await self.textChannel.send("Index out of range.")
 
-    async def getYoutubePlaylist(self, youtube_id: str, shuffled: bool) -> None:
-
+    async def getYoutubePlaylist(self, playlist_id: str, shuffled: bool) -> None:
+        self.data["playlist_id"] = playlist_id
         results = await getJsonResponse(
-            f"https://www.googleapis.com/youtube/v3/playlistItems?key={yt_key}&part=snippet,contentDetails&maxResults=30&playlistId={youtube_id}")
-        self.data["youtube_id"] = youtube_id;
-        await self.fillPlaylist(results,shuffled);
-
-    async def getNextPageYoutube(self):
-        print(self.data)
-        results = await getJsonResponse(
-            f"https://www.googleapis.com/youtube/v3/playlistItems?pageToken={self.data['nextPageToken']}&key={yt_key}&part=snippet,contentDetails&maxResults=30&playlistId={self.data['youtube_id']}")
-        await self.fillPlaylist(results,False);
-
-    async def fillPlaylist(self,results,shuffled:bool):
+            f"https://www.googleapis.com/youtube/v3/playlistItems?pageToken={self.data['nextPageToken']}&key={yt_key}&part=snippet,contentDetails&maxResults=30&playlistId={self.data['playlist_id']}")
         video_list = [Video(vid["snippet"]["resourceId"]["videoId"], vid["snippet"]["title"]) for vid in
                       results["items"] if vid["snippet"]["title"] != 'Deleted video' and vid["snippet"]["title"] != 'Private video']
-
         if shuffled:
             shuffle(video_list)
 
@@ -120,8 +109,7 @@ class GuildInstance:
         except:
             self.data["nextPageToken"] = ""
 
-        await self.textChannel.send(
-            embed=discord.Embed(title=f"{cont} song(s) where added to the playlist.", colour=COLOR_GREEN))
+        await self.textChannel.send(embed=discord.Embed(title=f"{cont} song(s) where added to the playlist.", colour=COLOR_GREEN))
 
     async def findYoutubeEquivalent(self):
 
@@ -227,7 +215,7 @@ class GuildInstance:
                         await self.playSong()
 
                     elif self.data["nextPageToken"] != "":
-                        await self.getNextPageYoutube()
+                        await self.getYoutubePlaylist(self.data["playlist_id"],True)
                     else:
                         reason = "Playlist is empty."
 
