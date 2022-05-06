@@ -25,7 +25,6 @@ class Misc(commands.Cog):
 
     @commands.command()
     async def help(self, context, part=None):
-
         if part == "music":
             text = """
                 •  ;play <url/nombre/numero> (r) (Supports searching by name, youtube videos and playlists and spotify playlists and albums.)
