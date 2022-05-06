@@ -28,50 +28,50 @@ class Misc(commands.Cog):
 
         if part == "music":
             text = """
-                •  /play <url/nombre/numero> (r) (Supports searching by name, youtube videos and playlists and spotify playlists and albums.)
-                •  /playlist
-                •  /song
-                •  /empty
-                •  /loop <off/single/all>
-                •  /skip (ind)
-                •  /leave 
-                •  /remove
+                •  ;play <url/nombre/numero> (r) (Supports searching by name, youtube videos and playlists and spotify playlists and albums.)
+                •  ;playlist
+                •  ;song
+                •  ;empty
+                •  ;loop <off/single/all>
+                •  ;skip (ind)
+                •  ;leave 
+                •  ;remove
            """
 
         elif part == "danbooru":
             text = """
-                •  /danbooru <tags>
-                •  /tags <tags>
+                •  ;danbooru <tags>
+                •  ;tags <tags>
            """
 
         elif part == "sauces":
             text = """
-                •  /sauce <url> 
+                •  ;sauce <url> 
            """
 
         elif part == "anime":
             text = """
-            •  /anime <name>
+            •  ;anime <name>
         """
 
         elif part == "imagenes":
             text = """
-                •  /pekora
-                •  /yes
-                •  /no
-                •  /pray
-                •  /haachama
-                •  /smug
+                •  ;pekora
+                •  ;yes
+                •  ;no
+                •  ;pray
+                •  ;haachama
+                •  ;smug
             """
 
         else:
 
             text = """
-                •  /help music
-                •  /help danbooru
-                •  /help sauces
-                •  /help anime
-                •  /help imagenes
+                •  ;help music
+                •  ;help danbooru
+                •  ;help sauces
+                •  ;help anime
+                •  ;help imagenes
             """
 
         await context.send(embed=discord.Embed(title="Help:", description=text, colour=discord.Color.green()))

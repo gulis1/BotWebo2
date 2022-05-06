@@ -1,10 +1,9 @@
 from random import shuffle
 from time import time
 from os import getenv
-from asyncio import sleep
+from asyncio import sleep, get_event_loop
 from os import remove
-import youtube_dl
-from threading import Thread
+import yt_dlp
 from spotify import HTTPClient
 import discord
 
@@ -18,7 +17,6 @@ spotifyClient = HTTPClient(spotifyClientId, spotifySecretId)
 
 MAX_SONGS = 30
 MAX_VIDEO_DURATION = 900
-
 
 COLOR_RED = discord.Color.red()
 COLOR_GREEN = discord.Color.green()
@@ -46,6 +44,7 @@ class GuildInstance:
         self.searchResults = []
         self.loop: int = 0
         self.currentSong: Video or None = None
+        self.data = {"youtube_id": "", "nextPageToken": ""}
 
     def emptyPlaylist(self):
         self.playlist = []
@@ -94,9 +93,18 @@ class GuildInstance:
 
         results = await getJsonResponse(
             f"https://www.googleapis.com/youtube/v3/playlistItems?key={yt_key}&part=snippet,contentDetails&maxResults=30&playlistId={youtube_id}")
+        self.data["youtube_id"] = youtube_id;
+        await self.fillPlaylist(results,shuffled);
 
+    async def getNextPageYoutube(self):
+        print(self.data)
+        results = await getJsonResponse(
+            f"https://www.googleapis.com/youtube/v3/playlistItems?pageToken={self.data['nextPageToken']}&key={yt_key}&part=snippet,contentDetails&maxResults=30&playlistId={self.data['youtube_id']}")
+        await self.fillPlaylist(results,False);
+
+    async def fillPlaylist(self,results,shuffled:bool):
         video_list = [Video(vid["snippet"]["resourceId"]["videoId"], vid["snippet"]["title"]) for vid in
-                      results["items"]]
+                      results["items"] if vid["snippet"]["title"] != 'Deleted video' and vid["snippet"]["title"] != 'Private video']
 
         if shuffled:
             shuffle(video_list)
@@ -107,8 +115,13 @@ class GuildInstance:
             cont += 1
             if len(self.playlist) >= 30:
                 break
+        try:
+            self.data["nextPageToken"] = results["nextPageToken"]
+        except:
+            self.data["nextPageToken"] = ""
 
-        await self.textChannel.send(embed=discord.Embed(title=f"{cont} song(s) where added to the playlist.", colour=COLOR_GREEN))
+        await self.textChannel.send(
+            embed=discord.Embed(title=f"{cont} song(s) where added to the playlist.", colour=COLOR_GREEN))
 
     async def findYoutubeEquivalent(self):
 
@@ -213,6 +226,8 @@ class GuildInstance:
                     if len(self.playlist) > 0 or self.loop == 1:
                         await self.playSong()
 
+                    elif self.data["nextPageToken"] != "":
+                        await self.getNextPageYoutube()
                     else:
                         reason = "Playlist is empty."
 
@@ -261,12 +276,8 @@ class GuildInstance:
             except FileNotFoundError:
                 pass
 
-
-            p1 = Thread(target=downloadSong, args=(self.currentSong.id, path))
-            p1.start()
-
-            while p1.is_alive():
-                await sleep(3)
+            loop = get_event_loop()
+            await loop.run_in_executor(None, downloadSong, self.currentSong.id, path)
 
         try:
             self.voiceClient.play(discord.FFmpegPCMAudio(path))
@@ -330,7 +341,7 @@ def downloadSong(videoId: str, path: str) -> None:
 
     ydl_opts = {'format': 'bestaudio/best', 'quiet': False, 'noplaylist': True, "outtmpl": path}
 
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])  # Download into the current working directory
 
 

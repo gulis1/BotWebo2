@@ -33,4 +33,10 @@ if [[ -n $SPOTIFY_SECRET_FILE ]]; then
 
 fi;
 
+if [[ -n $TINY_URL_FILE ]]; then
+    echo "Loading tiny url token..."
+    export TINY_URL=$(grep -v '^#' $TINY_URL_FILE | xargs)
+
+fi;
+
 ./sources/main.py

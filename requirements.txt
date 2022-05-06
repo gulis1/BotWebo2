@@ -2,5 +2,8 @@ certifi
 discord
 discord.py[voice]
 spotify
-youtube-dl
+yt-dlp
 python-dotenv
+
+xmltodict
+aiohttp
