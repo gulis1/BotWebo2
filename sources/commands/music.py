@@ -55,12 +55,10 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.check(userConnectedToGuildVoice)
     @commands.command()
-    async def play(self, context, url, shuffle=None):
+    async def play(self, context, url):
 
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
-
-        shuffle = True if shuffle == "r" else False
 
         if url.startswith("http"):
             yt_playlist = re.search("(youtube.com|youtu.be)(\/playlist\?list=)([a-zA-Z0-9\-\_]+)", url)
@@ -71,16 +69,16 @@ class Music(commands.Cog):
             spotify_album = re.search("(https:\/\/open.spotify.com)(\/user\/spotify\/playlist\/|\/album\/)(\w+)", url)
 
             if yt_playlist is not None:
-                await guild_instance.getYoutubePlaylist(yt_playlist[3], shuffle)
+                await guild_instance.getYoutubePlaylist(yt_playlist[3])
 
             elif yt_video is not None:
                 await guild_instance.addVideoToPlaylist(yt_video[2])
 
             elif spotify_playlist is not None:
-                await guild_instance.getSpotifyPlaylist(spotify_playlist[3], shuffle)
+                await guild_instance.getSpotifyPlaylist(spotify_playlist[3])
 
             elif spotify_album is not None:
-                await guild_instance.getSpotifyAlbum(spotify_album[3], shuffle)
+                await guild_instance.getSpotifyAlbum(spotify_album[3])
 
             else:
                 await guild_instance.textChannel.send(
@@ -142,6 +140,27 @@ class Music(commands.Cog):
                 embed=discord.Embed(title="Index out of range", color=discord.Color.green()))
 
         await context.message.delete()
+
+    @commands.guild_only()
+    @commands.check(userConnectedToGuildVoice)
+    @commands.check(botIsConnectedToGuildVoice)
+    @commands.cooldown(1, 30, commands.BucketType.guild)
+    @commands.command()
+    async def shuffle(self, context):
+
+        guild_instance = getGuildInstance(context.message.guild.id, create_if_missing=False)
+        await guild_instance.shuffleList()
+
+        await context.message.delete()
+
+    @shuffle.error
+    async def shuffle_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(
+                embed=discord.Embed(title=f'Please wait {round(error.retry_after)}s before shuffling again.', color=discord.Color.red()))
+            await ctx.message.delete()
+        else:
+            raise error
 
     @commands.guild_only()
     @commands.check(userConnectedToGuildVoice)

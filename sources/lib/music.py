@@ -47,14 +47,22 @@ class GuildInstance:
         self.data = {"playlist_id": "", "nextPageToken": ""}
 
     def emptyPlaylist(self):
+
         self.playlist = []
+
+        self.data["playlist_id"] = ""
+        self.data["nextPageToken"] = ""
+
+    async def shuffleList(self):
+
+        shuffle(self.playlist)
+        await self.textChannel.send(embed=discord.Embed(title="Playlist shuffled.", color=COLOR_GREEN))
 
     async def disconnect(self) -> None:
 
         self.loop = 0
         self.playlist.clear()
         self.currentSong = None
-
 
         await self.voiceClient.disconnect(force=True)
         self.voiceClient = None
@@ -89,14 +97,15 @@ class GuildInstance:
         except IndexError:
             await self.textChannel.send("Index out of range.")
 
-    async def getYoutubePlaylist(self, playlist_id: str, shuffled: bool) -> None:
+    async def getYoutubePlaylist(self, playlist_id: str) -> None:
+
         self.data["playlist_id"] = playlist_id
+
+
         results = await getJsonResponse(
             f"https://www.googleapis.com/youtube/v3/playlistItems?pageToken={self.data['nextPageToken']}&key={yt_key}&part=snippet,contentDetails&maxResults=30&playlistId={self.data['playlist_id']}")
         video_list = [Video(vid["snippet"]["resourceId"]["videoId"], vid["snippet"]["title"]) for vid in
                       results["items"] if vid["snippet"]["title"] != 'Deleted video' and vid["snippet"]["title"] != 'Private video']
-        if shuffled:
-            shuffle(video_list)
 
         cont = 0
         for video in video_list:
@@ -106,7 +115,7 @@ class GuildInstance:
                 break
         try:
             self.data["nextPageToken"] = results["nextPageToken"]
-        except:
+        except KeyError:
             self.data["nextPageToken"] = ""
 
         await self.textChannel.send(embed=discord.Embed(title=f"{cont} song(s) where added to the playlist.", colour=COLOR_GREEN))
@@ -123,6 +132,7 @@ class GuildInstance:
             await self.textChannel.send(embed=discord.Embed(title=f'Could not find a youtube video for song {self.currentSong.title}', colour=COLOR_RED))
 
     async def youtubeSearch(self, string: str) -> None:
+
         results = await getJsonResponse(
             f"https://www.googleapis.com/youtube/v3/search?key={yt_key}&part=snippet&type=video&q={string}")
 
@@ -150,13 +160,10 @@ class GuildInstance:
 
         self.currentSong.duration = convertTime(r["items"][0]["contentDetails"]["duration"]) if r is not None else 0
 
-    async def getSpotifyAlbum(self, albumID: str, shuffled: bool) -> None:
+    async def getSpotifyAlbum(self, albumID: str) -> None:
 
         album = await spotifyClient.album(albumID)
         lista = album["tracks"]["items"]
-
-        if shuffled:
-            shuffle(lista)
 
         cont = 0
         for song in album["tracks"]["items"]:
@@ -168,14 +175,11 @@ class GuildInstance:
 
         await self.textChannel.send(embed=discord.Embed(title=f"{cont} song(s) where added to the playlist.", colour=COLOR_GREEN))
 
-    async def getSpotifyPlaylist(self, playlist_id: str, shuffled: bool) -> None:
+    async def getSpotifyPlaylist(self, playlist_id: str) -> None:
 
         playlist = await spotifyClient.get_playlist(playlist_id)
 
         lista = playlist["tracks"]["items"]
-
-        if shuffled:
-            shuffle(lista)
 
         cont = 0
         for song in playlist["tracks"]["items"]:
@@ -215,7 +219,7 @@ class GuildInstance:
                         await self.playSong()
 
                     elif self.data["nextPageToken"] != "":
-                        await self.getYoutubePlaylist(self.data["playlist_id"],True)
+                        await self.getYoutubePlaylist(self.data["playlist_id"], True)
                     else:
                         reason = "Playlist is empty."
 
