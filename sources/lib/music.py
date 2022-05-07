@@ -6,6 +6,7 @@ from os import remove
 import yt_dlp
 from spotify import HTTPClient
 import discord
+from yt_dlp.utils import ExtractorError, DownloadError
 
 from sources.lib.myRequests import getJsonResponse
 
@@ -270,7 +271,6 @@ class GuildInstance:
 
             loop = get_event_loop()
             await loop.run_in_executor(None, downloadSong, self.currentSong.id, path)
-
         try:
             self.voiceClient.play(discord.FFmpegPCMAudio(path))
             self.currentSong.startTime = time()
@@ -286,9 +286,8 @@ class GuildInstance:
 
             try:
                 ind = int(ind)
-
-                self.playlist.insert(0, self.playlist[ind])
-                self.playlist.pop(ind + 1)
+                for x in range(ind):
+                    self.playlist.pop(0)
 
             except IndexError:
                 await self.textChannel.send(
@@ -332,10 +331,13 @@ def downloadSong(videoId: str, path: str) -> None:
     url = "https://www.youtube.com/watch?v={0}".format(videoId)
 
     ydl_opts = {'format': 'bestaudio/best', 'quiet': False, 'noplaylist': True, "outtmpl": path}
-
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])  # Download into the current working directory
-
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])  # Download into the current working directory
+    except ExtractorError:
+        pass
+    except DownloadError:
+        pass
 
 def convertTime(string: str) -> int:
     n = ""
