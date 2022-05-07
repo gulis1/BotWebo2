@@ -219,7 +219,7 @@ class GuildInstance:
                         await self.playSong()
 
                     elif self.data["nextPageToken"] != "":
-                        await self.getYoutubePlaylist(self.data["playlist_id"], True)
+                        await self.getYoutubePlaylist(self.data["playlist_id"])
                     else:
                         reason = "Playlist is empty."
 
@@ -286,9 +286,8 @@ class GuildInstance:
 
             try:
                 ind = int(ind)
-
-                self.playlist.insert(0, self.playlist[ind])
-                self.playlist.pop(ind + 1)
+                for x in range(ind):
+                    self.playlist.pop(0)
 
             except IndexError:
                 await self.textChannel.send(
@@ -332,9 +331,11 @@ def downloadSong(videoId: str, path: str) -> None:
     url = "https://www.youtube.com/watch?v={0}".format(videoId)
 
     ydl_opts = {'format': 'bestaudio/best', 'quiet': False, 'noplaylist': True, "outtmpl": path}
-
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])  # Download into the current working directory
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])  # Download into the current working directory
+    except:
+        print("falla en download")
 
 
 def convertTime(string: str) -> int:
