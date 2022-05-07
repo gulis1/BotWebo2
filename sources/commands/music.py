@@ -41,7 +41,7 @@ class Music(commands.Cog):
 
         elif msg == "single":
             guild_instance.loop = 1
-            guild_instance.playlist.append(guild_instance.currentSong)
+            #guild_instance.playlist.append(guild_instance.currentSong)
             await context.message.channel.send(
                 embed=discord.Embed(title="Loop set to single", color=discord.Color.green()))
 
