@@ -1,5 +1,7 @@
 from discord.ext import commands
 import discord
+from discord.ext.commands import CommandInvokeError
+
 from sources.lib.music import getGuildInstance
 from sources.lib.decorators import userConnectedToGuildVoice, botIsConnectedToGuildVoice
 import re
@@ -95,6 +97,7 @@ class Music(commands.Cog):
 
         await context.message.delete()
         await guild_instance.player(context.message.author.voice.channel)
+
 
     @commands.guild_only()
     @commands.check(userConnectedToGuildVoice)
