@@ -30,7 +30,6 @@ async def postJson(_url: str, headers=None, **kwargs):
     if headers is None:
         headers = {}
 
-    content = None
     async with aiohttp.ClientSession() as session:
 
         for key, value in headers.items():

@@ -22,15 +22,16 @@ class Newsletter:
 
         articles = list(takewhile(lambda x: self.__last_time < datetime.fromisoformat(x['published'][:-1]), data))
 
-        # Shorten retrieved articles' links.
-        for article in articles:
-            link = article['link']['@href']
-            response = await postJson('https://api.tinyurl.com/create', headers={'Authorization': f'Bearer {tiny_token}'}, url=link)
-
-            if response['status'] != 200:
-                print('Error with tiny-url api')
-            else:
-                article['link']['@href'] = response['content']['data']['tiny_url']
+        # TODO: fix this. (Tiny-url api not working)
+        # # Shorten retrieved articles' links.
+        # for article in articles:
+        #     link = article['link']['@href']
+        #     response = await postJson('https://api.tinyurl.com/create', headers={'Authorization': f'Bearer {tiny_token}'}, url=link)
+        #
+        #     if response['status'] != 200:
+        #         print('Error with tiny-url api')
+        #     else:
+        #         article['link']['@href'] = response['content']['data']['tiny_url']
 
         self.__last_time = datetime.fromisoformat(data[0]['published'][:-1])
         print(f'{datetime.now()}: {len(articles)} new articles found. Last one: {self.__last_time}')

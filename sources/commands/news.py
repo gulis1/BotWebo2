@@ -33,8 +33,8 @@ class News(commands.Cog):
             except KeyError:
                 pass
 
-        anime_news = [x['link']['@href'] for x in anime_news]
-        manga_news = [x['link']['@href'] for x in manga_news]
+        anime_news = [x['link']['@href'] for x in anime_news if 'link' in x.keys()]
+        manga_news = [x['link']['@href'] for x in manga_news if 'link' in x.keys()]
 
         for guild in self.bot.guilds:
             anime_channel = discord.utils.get(guild.channels, name='anime-webonews')
