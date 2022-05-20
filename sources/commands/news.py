@@ -21,15 +21,16 @@ class News(commands.Cog):
 
             try:
                 categories = article['category']
-                if type(categories) != list:
+                if type(categories) != list and 'link' in article.keys():
                     categories = [categories]
 
                 for cat in categories:
-                    if cat['@term'] == 'Anime':
+                    if cat['@term'] == 'Anime' and 'link' in article.keys():
                         anime_news.append(article)
 
-                    elif cat['@term'] == 'Manga':
+                    elif cat['@term'] == 'Manga' and 'link' in article.keys():
                         manga_news.append(article)
+
             except KeyError:
                 pass
 

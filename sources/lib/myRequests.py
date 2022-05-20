@@ -30,7 +30,8 @@ async def postJson(_url: str, headers=None, **kwargs):
     if headers is None:
         headers = {}
 
-    async with aiohttp.ClientSession() as session:
+    timeout = aiohttp.ClientTimeout(total=None, sock_connect=10, sock_read=10)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
 
         for key, value in headers.items():
             session.headers.add(key, value)
