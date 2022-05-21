@@ -21,20 +21,21 @@ class News(commands.Cog):
 
             try:
                 categories = article['category']
-                if type(categories) != list:
+                if type(categories) != list and 'link' in article.keys():
                     categories = [categories]
 
                 for cat in categories:
-                    if cat['@term'] == 'Anime':
+                    if cat['@term'] == 'Anime' and 'link' in article.keys():
                         anime_news.append(article)
 
-                    elif cat['@term'] == 'Manga':
+                    elif cat['@term'] == 'Manga' and 'link' in article.keys():
                         manga_news.append(article)
+
             except KeyError:
                 pass
 
-        anime_news = [x['link']['@href'] for x in anime_news]
-        manga_news = [x['link']['@href'] for x in manga_news]
+        anime_news = [x['link']['@href'] for x in anime_news if 'link' in x.keys()]
+        manga_news = [x['link']['@href'] for x in manga_news if 'link' in x.keys()]
 
         for guild in self.bot.guilds:
             anime_channel = discord.utils.get(guild.channels, name='anime-webonews')

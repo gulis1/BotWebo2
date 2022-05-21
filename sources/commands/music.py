@@ -96,6 +96,7 @@ class Music(commands.Cog):
         await context.message.delete()
         await guild_instance.player(context.message.author.voice.channel)
 
+
     @commands.guild_only()
     @commands.check(userConnectedToGuildVoice)
     @commands.check(botIsConnectedToGuildVoice)
