@@ -4,6 +4,7 @@ from os import getenv
 from asyncio import sleep, get_event_loop
 from os import remove
 import yt_dlp
+from discord import ClientException
 from spotify import HTTPClient
 import discord
 from yt_dlp.utils import ExtractorError, DownloadError
@@ -59,14 +60,14 @@ class GuildInstance:
         shuffle(self.playlist)
         await self.textChannel.send(embed=discord.Embed(title="Playlist shuffled.", color=COLOR_GREEN))
 
-    async def disconnect(self) -> None:
+    async def exit(self) -> None:
 
         self.loop = 0
-        self.playlist.clear()
+        self.emptyPlaylist()
         self.currentSong = None
 
-        await self.voiceClient.disconnect(force=True)
-        self.voiceClient = None
+        if self.voiceClient.is_connected:
+            await self.voiceClient.disconnect(force=True)
 
         try:
             remove("serverAudio/" + str(self.guild_id) + ".mp3")
@@ -201,32 +202,27 @@ class GuildInstance:
             return
 
         reason = None
-        while reason is None:
+        while self.voiceClient.is_connected():
 
-            if self.voiceClient is None:
-                reason = "Leave command."
+            if len(self.voiceClient.channel.members) == 1:
+                reason = "Channel is empty."
 
-            else:
+            elif not self.voiceClient.is_playing():
 
-                if not self.voiceClient.is_connected():
-                    reason = "I got kicked :cry:"
-
-                elif len(self.voiceClient.channel.members) == 1:
-                    reason = "Channel is empty."
-
-                elif not self.voiceClient.is_playing():
-
-                    if len(self.playlist) > 0 or self.loop == 1:
+                if len(self.playlist) > 0 or self.loop == 1:
+                    try:
                         await self.playSong()
+                    except ClientException:
+                        self.exit()
 
-                    elif self.data["nextPageToken"] != "":
-                        await self.getYoutubePlaylist(self.data["playlist_id"])
-                    else:
-                        reason = "Playlist is empty."
+                elif self.data["nextPageToken"] != "":
+                    await self.getYoutubePlaylist(self.data["playlist_id"])
+                else:
+                    reason = "Playlist is empty."
 
             await sleep(3)
 
-        await self.disconnect()
+        await self.exit()
         await self.textChannel.send(embed=discord.Embed(title=f"Leaving the channel: {reason}", colour=discord.Color.green()))
 
 
@@ -276,6 +272,7 @@ class GuildInstance:
             self.currentSong.startTime = time()
         except FileNotFoundError:
             self.textChannel.send(embed=discord.Embed(title="Could not download video", colour=COLOR_RED))
+        #catch the exception here
 
     async def skip(self, ind: int = None) -> None:
 
@@ -338,7 +335,6 @@ def downloadSong(videoId: str, path: str) -> None:
         pass
     except DownloadError:
         pass
-
 def convertTime(string: str) -> int:
     n = ""
     H = 0
