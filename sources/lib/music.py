@@ -41,7 +41,7 @@ class GuildInstance:
     def __init__(self, guild_id: int):
         self.guild_id = guild_id
         self.textChannel = None
-        self.voiceClient: discord.VoiceClient or None = None
+        self.voiceClient = None
         self.playlist = []
         self.searchResults = []
         self.loop: int = 0
@@ -199,6 +199,7 @@ class GuildInstance:
             self.voiceClient = await voice_channel.connect()
 
         except discord.ClientException:
+            await self.textChannel(embed=discord.Embed(title=f"Some error occurred.", colour=discord.Color.red()))
             return
 
         reason = None
@@ -213,7 +214,7 @@ class GuildInstance:
                     try:
                         await self.playSong()
                     except ClientException:
-                        self.exit()
+                        await self.exit()
 
                 elif self.data["nextPageToken"] != "":
                     await self.getYoutubePlaylist(self.data["playlist_id"])
@@ -223,8 +224,11 @@ class GuildInstance:
             await sleep(3)
 
         await self.exit()
-        await self.textChannel.send(embed=discord.Embed(title=f"Leaving the channel: {reason}", colour=discord.Color.green()))
 
+        if reason is None:
+            reason = "Some error occurred."
+
+        await self.textChannel.send(embed=discord.Embed(title=f"Leaving the channel: {reason}", colour=discord.Color.green()))
 
     async def playSong(self) -> None:
         global MAX_VIDEO_DURATION
@@ -244,8 +248,8 @@ class GuildInstance:
                 self.currentSong = None
                 return
 
-
-            # If the song has no id (Most likely becasue it comes from a spotify playlist), here a yt video will be found for that song
+        # If the song has no id (Most likely becasue it comes from a spotify playlist),
+        # here a yt video will be found for that song
         if self.currentSong.id is None:
             await self.findYoutubeEquivalent()
 
@@ -267,12 +271,16 @@ class GuildInstance:
 
             loop = get_event_loop()
             await loop.run_in_executor(None, downloadSong, self.currentSong.id, path)
+
         try:
             self.voiceClient.play(discord.FFmpegPCMAudio(path))
             self.currentSong.startTime = time()
+
         except FileNotFoundError:
             self.textChannel.send(embed=discord.Embed(title="Could not download video", colour=COLOR_RED))
-        #catch the exception here
+
+        except ClientException:
+            await self.exit()
 
     async def skip(self, ind: int = None) -> None:
 

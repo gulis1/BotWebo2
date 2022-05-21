@@ -1,7 +1,5 @@
 from discord.ext import commands
 import discord
-from discord.ext.commands import CommandInvokeError
-
 from sources.lib.music import getGuildInstance
 from sources.lib.decorators import userConnectedToGuildVoice, botIsConnectedToGuildVoice
 import re
