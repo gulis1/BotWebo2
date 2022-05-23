@@ -193,20 +193,20 @@ class GuildInstance:
 
         await self.textChannel.send(embed=discord.Embed(title=f"{cont} song(s) where added to the playlist.", colour=COLOR_GREEN))
 
+
     async def player(self, voice_channel: discord.VoiceChannel) -> None:
 
         try:
             self.voiceClient = await voice_channel.connect()
-
         except discord.ClientException:
-            await self.textChannel(embed=discord.Embed(title=f"Some error occurred.", colour=discord.Color.red()))
             return
 
-        reason = None
+        leave_reason = None
         while self.voiceClient.is_connected():
 
             if len(self.voiceClient.channel.members) == 1:
-                reason = "Channel is empty."
+                leave_reason = "Channel is empty."
+                await self.exit()
 
             elif not self.voiceClient.is_playing():
 
@@ -214,21 +214,23 @@ class GuildInstance:
                     try:
                         await self.playSong()
                     except ClientException:
+                        leave_reason = "Some error occurred."
+                        print("HOLA")
                         await self.exit()
 
                 elif self.data["nextPageToken"] != "":
                     await self.getYoutubePlaylist(self.data["playlist_id"])
                 else:
-                    reason = "Playlist is empty."
+                    leave_reason = "Playlist is empty."
+                    await self.exit()
 
             await sleep(3)
 
-        await self.exit()
 
-        if reason is None:
-            reason = "Some error occurred."
-
-        await self.textChannel.send(embed=discord.Embed(title=f"Leaving the channel: {reason}", colour=discord.Color.green()))
+        if leave_reason is None:
+            leave_reason = "I was kicked :("
+            await self.exit()
+        await self.textChannel.send(embed=discord.Embed(title=f"Leaving the channel: {leave_reason}", colour=discord.Color.green()))
 
     async def playSong(self) -> None:
         global MAX_VIDEO_DURATION
@@ -278,9 +280,6 @@ class GuildInstance:
 
         except FileNotFoundError:
             self.textChannel.send(embed=discord.Embed(title="Could not download video", colour=COLOR_RED))
-
-        except ClientException:
-            await self.exit()
 
     async def skip(self, ind: int = None) -> None:
 
