@@ -34,8 +34,11 @@ class News(commands.Cog):
             except KeyError:
                 pass
 
-        anime_news = [x['link']['@href'] for x in anime_news if 'link' in x.keys()]
-        manga_news = [x['link']['@href'] for x in manga_news if 'link' in x.keys()]
+        # Removes unnecessary parts of the URL.
+        def shorten(link): return "https://www.animenewsnetwork.com/" + link.split('/')[-1]
+
+        anime_news = [shorten(x['link']['@href']) for x in anime_news if 'link' in x.keys()]
+        manga_news = [shorten(x['link']['@href']) for x in manga_news if 'link' in x.keys()]
 
         for guild in self.bot.guilds:
             anime_channel = discord.utils.get(guild.channels, name='anime-webonews')
