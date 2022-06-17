@@ -9,6 +9,12 @@ class Danbooru(commands.Cog):
 
     @commands.command()
     async def danbooru(self, context, tag="*"):
+
+        """ Multiple usages:
+                [COMMAND_PREFIX]danbooru: gets a random image
+                [COMMAND_PREFIX]danbooru [tag]: gets a random image for the tag given
+        """
+
         embed = await sendDanbooruIm(tag)
         await context.send(embed=embed)
         await context.message.delete()

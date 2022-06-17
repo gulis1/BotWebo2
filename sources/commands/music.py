@@ -7,6 +7,8 @@ import re
 
 class Music(commands.Cog):
 
+    """ Has the functions of the music commands """
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -15,7 +17,9 @@ class Music(commands.Cog):
     @commands.check(botIsConnectedToGuildVoice)
     @commands.command()
     async def empty(self, context):
+        """ Empties the playlist. """
 
+        # Gets the guild where the bot is called
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
 
@@ -30,7 +34,9 @@ class Music(commands.Cog):
     @commands.check(botIsConnectedToGuildVoice)
     @commands.command()
     async def loop(self, context, msg):
+        """ Loops a single song, a playlist or disable the loop """
 
+        # Gets the guild where the bot is called
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
 
@@ -41,7 +47,7 @@ class Music(commands.Cog):
 
         elif msg == "single":
             guild_instance.loop = 1
-            #guild_instance.playlist.append(guild_instance.currentSong)
+            # guild_instance.playlist.append(guild_instance.currentSong)
             await context.message.channel.send(
                 embed=discord.Embed(title="Loop set to single", color=discord.Color.green()))
 
@@ -56,10 +62,13 @@ class Music(commands.Cog):
     @commands.check(userConnectedToGuildVoice)
     @commands.command()
     async def play(self, context, url):
+        """ Plays the song sent. """
 
+        # Gets the guild where the bot is called
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
 
+        # If the song is an url
         if url.startswith("http"):
             yt_playlist = re.search("(youtube.com|youtu.be)(\/playlist\?list=)([a-zA-Z0-9\-\_]+)", url)
             yt_video = re.search("(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*)", url)
@@ -84,10 +93,10 @@ class Music(commands.Cog):
                 await guild_instance.textChannel.send(
                     embed=discord.Embed(title="Wrong URL", colour=discord.Color.red()))
                 return
-
+        # When the song is only text, choose the song
         elif url.isnumeric():
             await guild_instance.addToPlaylistFromSearchList(int(url) - 1)
-
+        # If the song is only text
         else:
             await guild_instance.youtubeSearch(context.message.content[5:])
             await context.message.delete()
@@ -96,13 +105,14 @@ class Music(commands.Cog):
         await context.message.delete()
         await guild_instance.player(context.message.author.voice.channel)
 
-
     @commands.guild_only()
     @commands.check(userConnectedToGuildVoice)
     @commands.check(botIsConnectedToGuildVoice)
     @commands.command()
     async def playlist(self, context):
+        """ Gets the whole playlist. """
 
+        # Gets the guild where the bot is called
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
 
@@ -114,7 +124,7 @@ class Music(commands.Cog):
 
         else:
             loop = "all"
-
+        
         text = f"• **Actual:** {guild_instance.currentSong.title} \n• **Loop:** {loop}\n \n"
         for num, video in enumerate(guild_instance.playlist):
             text += '**' + str(num + 1) + ")  " + '**' + video.title + "\n \n"
@@ -128,7 +138,9 @@ class Music(commands.Cog):
     @commands.check(botIsConnectedToGuildVoice)
     @commands.command()
     async def remove(self, context, ind: int):
+        """ Removes the index song from the playlist """
 
+        # Gets the guild where the bot is called
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
 
@@ -149,6 +161,9 @@ class Music(commands.Cog):
     @commands.command()
     async def shuffle(self, context):
 
+        """Shuffles the playlist. """
+
+        # Gets the guild where the bot is called
         guild_instance = getGuildInstance(context.message.guild.id, create_if_missing=False)
         await guild_instance.shuffleList()
 
@@ -169,6 +184,7 @@ class Music(commands.Cog):
     @commands.command()
     async def skip(self, context, ind=None):
 
+        # Gets the guild where the bot is called
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
 
@@ -191,7 +207,9 @@ class Music(commands.Cog):
     @commands.check(botIsConnectedToGuildVoice)
     @commands.command()
     async def song(self, context):
+        """ Shows the current song playing """
 
+        # Gets the guild where the bot is called
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
 

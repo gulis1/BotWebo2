@@ -2,6 +2,9 @@ import aiohttp
 
 
 async def getJsonResponse(url: str):
+
+    """ Parses an url data to JSON type. """
+
     content = None
 
     async with aiohttp.ClientSession() as session:
@@ -14,6 +17,9 @@ async def getJsonResponse(url: str):
 
 
 async def getStringResponse(url: str) -> str:
+
+    """ Parses an url data to STRING type. """
+
     content = None
 
     async with aiohttp.ClientSession() as session:
@@ -26,6 +32,8 @@ async def getStringResponse(url: str) -> str:
 
 
 async def postJson(_url: str, headers=None, **kwargs):
+
+    """ Post JSON """
 
     if headers is None:
         headers = {}
