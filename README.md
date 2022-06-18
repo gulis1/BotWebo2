@@ -13,13 +13,13 @@
 * [pekofy](#peko)
 ---
 <h3 id="help" style="text-decoration: underline">Help command</h3>
-Shows the information of the commands of the bot
+Shows information about the commands supported by the bot.
 <br>
 
 [See more...](sources/commands/misc.py)
 
 <h3 id="music"> Music commands </h3>
-Supports searching by name, youtube videos and playlist and spotify playlists and albums.
+Supports searching by name, YouTube videos and playlist, and Spotify albums and playlists.
 
 * [**play** <url/name/number>](sources/commands/music.py)
 * [**playlist**](sources/commands/music.py)                    _Shows current playlist._
@@ -34,7 +34,7 @@ Supports searching by name, youtube videos and playlist and spotify playlists an
 
 <h3 id="danbooru">Danbooru commands</h3>
 
-* [**danbooru** tags](sources/commands/danbooru.py)          _Sends a random image from danbooru with the specified tags._
+* [**danbooru** tags](sources/commands/danbooru.py)          _Sends a random image from danbooru with the specified tag._
 <br>
 [See more...](sources/lib/danbooru.py)
 <h3 id="sauce"> Saucenao commands</h3>
@@ -43,21 +43,21 @@ Supports searching by name, youtube videos and playlist and spotify playlists an
 <br>
 [See more...](sources/lib/sauces.py)
 <br>
-To find the source for an image in your computer, send the image with "/sauce" as the comment.
+If an image is attached to a message, the search will be done fot that image.
 
 <h3 id="anilist"> Anilist commands</h3>
 
-* [**anime** name](sources/commands/anime.py)             _Gets the remaining time until the next episode of the specified anime._
+* [**anime** name](sources/commands/anime.py)       _Gets the remaining time until the next episode of the specified anime._
 <br>
 [See more...](sources/lib/animeStuff.py)
 ---
 <h3 id="news">Anime news</h3>
 
-First you must have 2 discord channels called "anime-webonews" and "manga-webonews" or change the channels name in the [news.py](sources/commands/news.py)'s header, called _ANIME_CHANNEL_ and _MANGA_CHANNEL_.
+First you must have 2 discord channels called "anime-webonews" and "manga-webonews" or change the channels name in [news.py](sources/commands/news.py)'s header, called _ANIME_CHANNEL_ and _MANGA_CHANNEL_.
 
-Then, every 20 mins the bot will send the most recently anime news.
+Then, every 20 mins the bot will send the most recent anime news.
 
-Created using the [animenewsnetwork.com](https://www.animenewsnetwork.com) newsfeed
+Created using the [animenewsnetwork.com](https://www.animenewsnetwork.com) newsfeed.
 
 [File here](https://www.animenewsnetwork.com/news/atom.xml)
 

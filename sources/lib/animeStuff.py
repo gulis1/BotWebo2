@@ -40,7 +40,7 @@ async def timeUntilAiring(title: str) -> discord.Embed:
     else:
         embed = discord.Embed(colour=discord.Color.dark_teal())
 
-        # The anime looked for does not exists
+        # The anime looked for does not exist.
         if res["status"] == 404:
             embed.title = f'Could not find show "{title}"'
 

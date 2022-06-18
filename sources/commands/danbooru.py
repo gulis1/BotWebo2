@@ -1,5 +1,5 @@
 from discord.ext import commands
-from sources.lib.danbooru import sendDanbooruIm
+from sources.lib.danbooru import send_danbooru_image
 
 
 class Danbooru(commands.Cog):
@@ -15,7 +15,7 @@ class Danbooru(commands.Cog):
                 [COMMAND_PREFIX]danbooru [tag]: gets a random image for the tag given
         """
 
-        embed = await sendDanbooruIm(tag)
+        embed = await send_danbooru_image(tag)
         await context.send(embed=embed)
         await context.message.delete()
 
