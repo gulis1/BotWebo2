@@ -6,17 +6,24 @@ from os import getenv
 
 intents = Intents.default()
 intents.members = True
-bot = commands.Bot(";", intents=intents)
+COMMAND_PREFIX = ";" # The COMMAND_PREFIX
+bot = commands.Bot(COMMAND_PREFIX, intents=intents)
 
 
 @bot.event
 async def on_ready():
+
+    """ What the bot do when its ready to work """
+
     print('Ready')
 
 
 def main():
+
+    """ main method """
+
     load_dotenv(find_dotenv())
-    discord_token = getenv("DISCORD_TOKEN")
+    discord_token = getenv("DISCORD_TOKEN") # takes the TOKEN from the DISCORD_TOKEN on env.example
 
     bot.load_extension("sources.commands")
     bot.run(discord_token)

@@ -1,9 +1,8 @@
 import xmltodict as xml
 from datetime import datetime
-
-
 from sources.lib.myRequests import getStringResponse
 from itertools import takewhile
+
 
 class Newsletter:
 
