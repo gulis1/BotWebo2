@@ -1,3 +1,4 @@
+import os.path
 from random import shuffle
 from time import time
 from os import getenv
@@ -8,8 +9,10 @@ from discord import ClientException
 from spotify import HTTPClient
 import discord
 from yt_dlp.utils import ExtractorError, DownloadError
-
-from sources.lib.myRequests import getJsonResponse
+from sources.lib.myRequests import getJsonResponse, postJson
+from os import path, mkdir
+import json
+import http
 
 yt_key = getenv("YT_KEY")
 spotifyClientId = getenv("SPOTIFY_ID")
@@ -311,6 +314,66 @@ class GuildInstance:
         except IndexError:
             await self.textChannel.send(
                 embed=discord.Embed(title="Index out of range", color=COLOR_RED))
+
+    async def getAnilistData(self, username: str) -> None:
+
+        if os.path.exists("../data") == 0:
+            os.mkdir("../data")
+
+        file = open("../data/animeList.json","w")
+
+        url = 'https://graphql.anilist.co'
+
+        query = ''' 
+            query UserMediaListQuery ($username: String, $page: Int, $status: MediaListStatus) {
+                Page (page: $page, perPage: 50) {
+                    mediaList (userName: $username, status: $status, type: ANIME, sort: MEDIA_TITLE_ROMAJI) {
+                        media {
+                            title {
+                                userPreferred
+                            }
+                        }
+  	                }
+                }
+            }
+        '''
+        variables = {
+            'username': username,
+            'page': 1,
+            'status': 'COMPLETED'
+        }
+
+        list1 = []
+
+        exit = False
+        count = 0
+        while not exit:
+            response = await postJson(url, query=query, variables=variables)
+
+            if response is None or response['status'] == 404:
+                return discord.Embed(colour=discord.Color.dark_teal(), title="An error has occurred.")
+
+
+            x = response['content']['data']['Page']['mediaList']
+            if len(x)!=0:
+                for name in x:
+                    list1.append(name['media']['title']['userPreferred'])
+                    count += 1
+            else:
+                exit = True
+
+            variables['page'] += 1
+
+        list2 = {
+            'n': count,
+            'animes': list1
+        }
+
+        file.write(json.dumps(list2))
+    async def playRandomTheme(self) -> None:
+        url = 'https://api.animethemes.moe/search?q=vinland-saga&include[anime]=animethemes.animethemeentries.videos.audio'
+        return
+
 
 
 guilds = {}
