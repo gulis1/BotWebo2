@@ -213,6 +213,21 @@ class Music(commands.Cog):
         await guild_instance.textChannel.send(embed=embed)
         await context.message.delete()
 
+    @commands.guild_only()
+    @commands.check(userConnectedToGuildVoice)
+    @commands.command()
+    async def random(self , context, username=None):
+
+        guild_instance = getGuildInstance(context.message.guild.id)
+        guild_instance.textChannel = context.message.channel
+
+        if username is not None:
+            await guild_instance.getAnilistData(username)
+        else:
+            await guild_instance.textChannel.send(
+                embed=discord.Embed(title="need AniList username", color=discord.Color.green()))
+            return
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Music(bot))

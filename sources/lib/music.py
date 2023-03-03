@@ -1,3 +1,4 @@
+import os
 from random import shuffle
 from time import time
 from os import getenv
@@ -10,6 +11,8 @@ import discord
 from yt_dlp.utils import ExtractorError, DownloadError
 
 from sources.lib.myRequests import getJsonResponse
+
+from os import mkdir
 
 yt_key = getenv("YT_KEY")
 spotifyClientId = getenv("SPOTIFY_ID")
@@ -312,6 +315,30 @@ class GuildInstance:
             await self.textChannel.send(
                 embed=discord.Embed(title="Index out of range", color=COLOR_RED))
 
+    async def getAnilistData(self, username: str) -> None:
+        if os.path.exists("../data") == 0:
+            os.mkdir("../data")
+
+        file = open("../data/animeList.json","w")
+
+        url = 'https://graphql.anilist.co'
+        songURL = 'https://api.animethemes.moe/search?q=$name&include[anime]=animethemes.animethemeentries.videos.audio'
+        query = '''
+        query UserMediaListQuery ($username: String, $page: Int, $status: MediaListStatus=COMPLETED) {
+          Page (page: $page, perPage: 50) {
+
+            mediaList (userName: $username, status: $status, type: ANIME, sort: MEDIA_TITLE_ROMAJI) {
+              media {
+                title {
+                  userPreferred
+                }
+              }
+            }
+          }
+        }
+        '''
+
+
 
 guilds = {}
 
@@ -366,3 +393,4 @@ def convertTime(string: str) -> int:
             n = ""
 
     return H * 3600 + M * 60 + S
+
