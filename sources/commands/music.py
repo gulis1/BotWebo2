@@ -217,17 +217,40 @@ class Music(commands.Cog):
     @commands.check(userConnectedToGuildVoice)
     @commands.command()
     async def random(self, context, username):
+
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
 
         if username is not None:
-            await guild_instance.getAnilistData(username)
-            await guild_instance.playRandomTheme()
+            try:
+                await guild_instance.getAnilistData(username)
+            except Exception as e:
+                await guild_instance.textChannel.send(embed=discord.Embed(title=str(e),color=discord.Color.red()))
+                return
         else:
             await guild_instance.textChannel.send(
                 embed=discord.Embed(title="needs AniList username: ;random [username].", color=discord.Color.red()))
             return
+        await guild_instance.randomThemePlayer(context.message.author.voice.channel)
 
+    @commands.guild_only()
+    @commands.check(userConnectedToGuildVoice)
+    @commands.check(botIsConnectedToGuildVoice)
+    @commands.command()
+    async def rstop(self,context):
+        guild_instance = getGuildInstance(context.message.guild.id)
+        guild_instance.textChannel = context.message.channel
+
+        await guild_instance.stopRandomTheme()
+
+    @commands.guild_only()
+    @commands.check(userConnectedToGuildVoice)
+    @commands.check(botIsConnectedToGuildVoice)
+    @commands.command()
+    async def rsong(self,context):
+        guild_instance = getGuildInstance(context.message.guild.id)
+        guild_instance.textChannel = context.message.channel
+        await guild_instance.showTheme()
 
 def setup(bot: commands.Bot):
     bot.add_cog(Music(bot))

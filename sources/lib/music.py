@@ -1,18 +1,17 @@
-import os.path
+import json
+import os
+import random
 from random import shuffle
 from time import time
 from os import getenv
 from asyncio import sleep, get_event_loop
 from os import remove
 import yt_dlp
-from discord import ClientException
+from discord import ClientException, FFmpegPCMAudio
 from spotify import HTTPClient
 import discord
 from yt_dlp.utils import ExtractorError, DownloadError
 from sources.lib.myRequests import getJsonResponse, postJson
-from os import path, mkdir
-import json
-import http
 
 yt_key = getenv("YT_KEY")
 spotifyClientId = getenv("SPOTIFY_ID")
@@ -22,7 +21,6 @@ spotifyClient = HTTPClient(spotifyClientId, spotifySecretId)
 
 MAX_SONGS = 30
 MAX_VIDEO_DURATION = 900
-
 COLOR_RED = discord.Color.red()
 COLOR_GREEN = discord.Color.green()
 
@@ -50,6 +48,8 @@ class GuildInstance:
         self.loop: int = 0
         self.currentSong: Video or None = None
         self.data = {"playlist_id": "", "nextPageToken": ""}
+        self.random = False
+        self.randomSong = ""
 
     def emptyPlaylist(self):
 
@@ -68,6 +68,7 @@ class GuildInstance:
         self.loop = 0
         self.emptyPlaylist()
         self.currentSong = None
+        self.random = False
 
         if self.voiceClient.is_connected:
             await self.voiceClient.disconnect(force=True)
@@ -218,7 +219,6 @@ class GuildInstance:
                         await self.playSong()
                     except ClientException:
                         leave_reason = "Some error occurred."
-                        print("HOLA")
                         await self.exit()
 
                 elif self.data["nextPageToken"] != "":
@@ -316,10 +316,10 @@ class GuildInstance:
                 embed=discord.Embed(title="Index out of range", color=COLOR_RED))
 
     async def getAnilistData(self, username: str) -> None:
-
+        #creates directory if not exists
         if os.path.exists("../data") == 0:
             os.mkdir("../data")
-
+        #open file for write and delete all it has if exists and if not creates a new one
         file = open("../data/animeList.json","w")
 
         url = 'https://graphql.anilist.co'
@@ -342,17 +342,17 @@ class GuildInstance:
             'page': 1,
             'status': 'COMPLETED'
         }
-
         list1 = []
-
         exit = False
         count = 0
+        #importing animes that the user completed to a json file
         while not exit:
             response = await postJson(url, query=query, variables=variables)
 
             if response is None or response['status'] == 404:
-                return discord.Embed(colour=discord.Color.dark_teal(), title="An error has occurred.")
-
+                raise Exception("something went wrong")
+            elif response['status'] == 500:
+                raise Exception("user not found")
 
             x = response['content']['data']['Page']['mediaList']
             if len(x)!=0:
@@ -370,11 +370,70 @@ class GuildInstance:
         }
 
         file.write(json.dumps(list2))
-    async def playRandomTheme(self) -> None:
-        url = 'https://api.animethemes.moe/search?q=vinland-saga&include[anime]=animethemes.animethemeentries.videos.audio'
-        return
+
+    async def randomThemePlayer(self,voice_channel: discord.VoiceChannel) -> None:
+            try:
+                self.voiceClient = await  voice_channel.connect()
+            except discord.ClientException:
+                return
+
+            leave_reason = None
+            self.random = True
+            while self.voiceClient.is_connected():
+
+                if len(self.voiceClient.channel.members) == 1:
+                    leave_reason = "Channel is empty."
+                    await self.exit()
+
+                elif not self.voiceClient.is_playing():
+
+                    if self.random == True:
+                        try:
+                            await self.playTheme()
+                        except ClientException:
+                            leave_reason = "Some error occurred."
+                            await self.exit()
+                    else:
+                        leave_reason = "random is false"
+                        await self.exit()
+                await sleep(3)
+
+            if leave_reason is None:
+                leave_reason = "I was kicked :("
+                await self.exit()
+            await self.textChannel.send(
+                embed=discord.Embed(title=f"Leaving the channel: {leave_reason}", colour=discord.Color.green()))
 
 
+    async def playTheme(self):
+
+        with open('../data/animeList.json', 'r') as f:
+            data = json.load(f)
+
+        rng = random.randint(0, data['n'] - 1)
+        anime = data['animes'][rng]
+        self.randomSong = anime
+        anime = anime.replace(" ", "-")
+        response = await getJsonResponse(
+            f"https://api.animethemes.moe/search?q={anime}&include[anime]=animethemes.animethemeentries.videos.audio")
+
+        themes = response['search']['anime'][0]['animethemes']
+        rng = random.randint(0, len(themes) - 1)
+        self.randomSong += " " + themes[rng]['slug']
+        songURL = themes[rng]['animethemeentries'][0]['videos'][0]['audio']['link']
+        source = FFmpegPCMAudio(songURL, executable="ffmpeg")
+        self.voiceClient.play(source,after=None)
+
+    async def stopRandomTheme(self):
+        await self.exit()
+
+    async def showTheme(self):
+        if not self.voiceClient.is_playing():
+            await self.textChannel.send(
+                embed=discord.Embed(title="Not playing any random theme", colour=discord.Color.red()))
+            return
+        await self.textChannel.send(
+            embed=discord.Embed(title=f"Song: {self.randomSong}", colour=discord.Color.green()))
 
 guilds = {}
 
