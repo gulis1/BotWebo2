@@ -226,6 +226,7 @@ class Music(commands.Cog):
                 await guild_instance.getAnilistData(username)
             except Exception as e:
                 await guild_instance.textChannel.send(embed=discord.Embed(title=str(e),color=discord.Color.red()))
+                await context.message.delete()
                 return
         else:
             await guild_instance.textChannel.send(
