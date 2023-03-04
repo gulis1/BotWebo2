@@ -365,6 +365,7 @@ class GuildInstance:
             variables['page'] += 1
 
         list2 = {
+            'username': username,
             'n': count,
             'animes': list1
         }
@@ -384,6 +385,8 @@ class GuildInstance:
                 if len(self.voiceClient.channel.members) == 1:
                     leave_reason = "Channel is empty."
                     await self.exit()
+
+
 
                 elif not self.voiceClient.is_playing():
 
@@ -408,14 +411,19 @@ class GuildInstance:
     async def playTheme(self):
 
         with open('../data/animeList.json', 'r') as f:
-            data = json.load(f)
-
-        rng = random.randint(0, data['n'] - 1)
-        anime = data['animes'][rng]
-        self.randomSong = anime
-        anime = anime.replace(" ", "-")
-        response = await getJsonResponse(
-            f"https://api.animethemes.moe/search?q={anime}&include[anime]=animethemes.animethemeentries.videos.audio")
+            try:
+                data = json.load(f)
+            except Exception:
+                raise Exception("Empty List. Please, Load an anilist anime list with the command ;load <username>")
+        while True:
+            rng = random.randint(0, data['n'] - 1)
+            anime = data['animes'][rng]
+            self.randomSong = anime
+            anime = anime.replace(" ", "-")
+            response = await getJsonResponse(
+                f"https://api.animethemes.moe/search?q={anime}&include[anime]=animethemes.animethemeentries.videos.audio")
+            if len(response['search']['anime']) != 0:
+                break;
 
         themes = response['search']['anime'][0]['animethemes']
         rng = random.randint(0, len(themes) - 1)
@@ -426,14 +434,6 @@ class GuildInstance:
 
     async def stopRandomTheme(self):
         await self.exit()
-
-    async def showTheme(self):
-        if not self.voiceClient.is_playing():
-            await self.textChannel.send(
-                embed=discord.Embed(title="Not playing any random theme", colour=discord.Color.red()))
-            return
-        await self.textChannel.send(
-            embed=discord.Embed(title=f"Song: {self.randomSong}", colour=discord.Color.green()))
 
 guilds = {}
 
@@ -488,3 +488,13 @@ def convertTime(string: str) -> int:
             n = ""
 
     return H * 3600 + M * 60 + S
+
+def checkListUser() ->str:
+        with open('../data/animeList.json', 'r') as f:
+            try:
+                data = json.load(f)
+            except Exception:
+                raise Exception("Empty List. Please, Load an anilist anime list with the command ;load <username>")
+
+        return data['username']
+

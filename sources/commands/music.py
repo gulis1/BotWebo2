@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-from sources.lib.music import getGuildInstance
+from sources.lib.music import getGuildInstance, checkListUser
 from sources.lib.decorators import userConnectedToGuildVoice, botIsConnectedToGuildVoice
 import re
 
@@ -199,14 +199,14 @@ class Music(commands.Cog):
 
         if guild_instance.voiceClient is not None and guild_instance.voiceClient.is_playing():
             msg = "------------------------------"
-            ind = round(len(msg) * (guild_instance.currentSong.perCentPlayed()))
+            if guild_instance.currentSong is not None:
+                ind = round(len(msg) * (guild_instance.currentSong.perCentPlayed()))
 
-            msg = msg[:ind] + "**|**" + msg[ind + 1:]
-
-            embed.title = guild_instance.currentSong.title
-
-            embed.description = msg
-
+                msg = msg[:ind] + "**|**" + msg[ind + 1:]
+                embed.title = guild_instance.currentSong.title
+                embed.description = msg
+            else:
+                embed.title = guild_instance.randomSong
         else:
             embed.title = "No song is playing."
 
@@ -216,7 +216,7 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.check(userConnectedToGuildVoice)
     @commands.command()
-    async def random(self, context, username):
+    async def rload(self, context, username=None):
 
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
@@ -229,9 +229,23 @@ class Music(commands.Cog):
                 return
         else:
             await guild_instance.textChannel.send(
-                embed=discord.Embed(title="needs AniList username: ;random [username].", color=discord.Color.red()))
+                embed=discord.Embed(title="needs AniList username: ;rload [username].", color=discord.Color.red()))
+            await context.message.delete()
             return
-        await guild_instance.randomThemePlayer(context.message.author.voice.channel)
+        await guild_instance.textChannel.send(embed=discord.Embed(title=f"{username}'s list loaded", color=discord.Color.green()))
+        await context.message.delete()
+
+    @commands.guild_only()
+    @commands.check(userConnectedToGuildVoice)
+    @commands.command()
+    async def rplay(self,context):
+        guild_instance = getGuildInstance(context.message.guild.id)
+        guild_instance.textChannel = context.message.channel
+        try:
+            await guild_instance.randomThemePlayer(context.message.author.voice.channel)
+        except Exception as e:
+            await guild_instance.textChannel.send(embed=discord.Embed(title=str(e), color=discord.Color.red()))
+            await context.message.delete()
 
     @commands.guild_only()
     @commands.check(userConnectedToGuildVoice)
@@ -245,12 +259,18 @@ class Music(commands.Cog):
 
     @commands.guild_only()
     @commands.check(userConnectedToGuildVoice)
-    @commands.check(botIsConnectedToGuildVoice)
     @commands.command()
-    async def rsong(self,context):
+    async def ruser(self,context):
+
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
-        await guild_instance.showTheme()
+        try:
+            user = checkListUser()
+            await guild_instance.textChannel.send(embed=discord.Embed(title=f"currently using {user}'s list", color=discord.Color.green()))
+            await context.message.delete()
+        except Exception as e:
+            await guild_instance.textChannel.send(embed=discord.Embed(title=str(e), color=discord.Color.red()))
+            await context.message.delete()
 
 def setup(bot: commands.Bot):
     bot.add_cog(Music(bot))
