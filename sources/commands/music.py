@@ -206,7 +206,8 @@ class Music(commands.Cog):
                 embed.title = guild_instance.currentSong.title
                 embed.description = msg
             else:
-                embed.title = guild_instance.randomSong
+                embed.title = guild_instance.randomSong + " " + guild_instance.randomSongSlug
+                embed.set_image(url=guild_instance.randomSongImage)
         else:
             embed.title = "No song is playing."
 

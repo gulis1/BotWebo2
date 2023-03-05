@@ -50,6 +50,8 @@ class GuildInstance:
         self.data = {"playlist_id": "", "nextPageToken": ""}
         self.random = False
         self.randomSong = ""
+        self.randomSongSlug = ""
+        self.randomSongImage = ""
 
     def emptyPlaylist(self):
 
@@ -342,7 +344,7 @@ class GuildInstance:
             'page': 1,
             'status': 'COMPLETED'
         }
-        list1 = []
+        animelist = []
         exit = False
         count = 0
         #importing animes that the user completed to a json file
@@ -356,8 +358,8 @@ class GuildInstance:
 
             x = response['content']['data']['Page']['mediaList']
             if len(x)!=0:
-                for name in x:
-                    list1.append(name['media']['title']['userPreferred'])
+                for anime in x:
+                    animelist.append(anime['media']['title']['userPreferred'])
                     count += 1
             else:
                 exit = True
@@ -367,7 +369,7 @@ class GuildInstance:
         list2 = {
             'username': username,
             'n': count,
-            'animes': list1
+            'animes': animelist
         }
 
         file.write(json.dumps(list2))
@@ -409,7 +411,7 @@ class GuildInstance:
 
 
     async def playTheme(self):
-
+        #get random anime
         with open('../data/animeList.json', 'r') as f:
             try:
                 data = json.load(f)
@@ -419,15 +421,36 @@ class GuildInstance:
             rng = random.randint(0, data['n'] - 1)
             anime = data['animes'][rng]
             self.randomSong = anime
-            anime = anime.replace(" ", "-")
+            name = anime.replace(" ", "-")
             response = await getJsonResponse(
-                f"https://api.animethemes.moe/search?q={anime}&include[anime]=animethemes.animethemeentries.videos.audio")
+                f"https://api.animethemes.moe/search?q={name}&include[anime]=animethemes.animethemeentries.videos.audio")
             if len(response['search']['anime']) != 0:
                 break;
 
+        #get anime image
+        url = 'https://graphql.anilist.co'
+        query = '''
+        query songImage($userPreferred: String) {
+            Media (search : $userPreferred) {
+                title {
+                  userPreferred
+                }
+                coverImage {
+                  extraLarge
+                }
+            }
+        }
+        '''
+        variables = {
+            'userPreferred': name
+        }
+        image = await postJson(url, query=query, variables=variables)
+        self.randomSongImage = image['content']['data']['Media']['coverImage']['extraLarge']
+
+        #play
         themes = response['search']['anime'][0]['animethemes']
         rng = random.randint(0, len(themes) - 1)
-        self.randomSong += " " + themes[rng]['slug']
+        self.randomSongSlug = themes[rng]['slug']
         songURL = themes[rng]['animethemeentries'][0]['videos'][0]['audio']['link']
         source = FFmpegPCMAudio(songURL, executable="ffmpeg")
         self.voiceClient.play(source,after=None)
