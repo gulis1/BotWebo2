@@ -35,6 +35,10 @@ class Misc(commands.Cog):
                 •  ;skip (ind)
                 •  ;leave 
                 •  ;remove
+                •  ;rload
+                •  ;rplay
+                •  ;ruser
+                •  ;rstop
            """
 
         elif part == "danbooru":
