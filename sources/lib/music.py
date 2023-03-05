@@ -430,8 +430,8 @@ class GuildInstance:
         #get anime image
         url = 'https://graphql.anilist.co'
         query = '''
-        query songImage($userPreferred: String) {
-            Media (search : $userPreferred) {
+        query songImage($userPreferred: String, $type: MediaType) {
+            Media (search : $userPreferred, type: $type) {
                 title {
                   userPreferred
                 }
@@ -442,7 +442,8 @@ class GuildInstance:
         }
         '''
         variables = {
-            'userPreferred': name
+            'userPreferred': name,
+            'type': 'ANIME'
         }
         image = await postJson(url, query=query, variables=variables)
         self.randomSongImage = image['content']['data']['Media']['coverImage']['extraLarge']
