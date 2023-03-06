@@ -451,15 +451,13 @@ class GuildInstance:
         rng = random.randint(0, len(themes) - 1)
         self.randomSongSlug = themes[rng]['slug']
         songURL = themes[rng]['animethemeentries'][0]['videos'][0]['audio']['link']
-
         # Get the bitrate of the audio file
         ffprobe_command = ['ffprobe', '-i', songURL, '-show_entries', 'format=bit_rate', '-v', 'quiet', '-of', 'csv=p=0']
         output = subprocess.check_output(ffprobe_command)
         bitrate = int(output)
 
         # Calculate the buffer size based on the bitrate
-        buffer_size = str(bitrate // 8) + 'k'
-
+        buffer_size = str(bitrate * 32 // 8) + 'k'
         source = discord.FFmpegOpusAudio(songURL, options=f'-bufsize {buffer_size} -max_delay 500000')
         self.voiceClient.play(source,after=None)
 

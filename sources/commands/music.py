@@ -60,6 +60,11 @@ class Music(commands.Cog):
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
 
+        if guild_instance.random == True:
+            await guild_instance.textChannel.send(
+                embed=discord.Embed(title="Stop random with ;rstop first", color=discord.Color.red()))
+            return
+
         if url.startswith("http"):
             yt_playlist = re.search("(youtube.com|youtu.be)(\/playlist\?list=)([a-zA-Z0-9\-\_]+)", url)
             yt_video = re.search("(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*)", url)
