@@ -118,7 +118,11 @@ class Music(commands.Cog):
         else:
             loop = "all"
 
-        text = f"• **Actual:** {guild_instance.currentSong.title} \n• **Loop:** {loop}\n \n"
+        if guild_instance.currentSong is not None:
+            text = f"• **Actual:** {guild_instance.currentSong.title} \n• **Loop:** {loop}\n \n"
+        else:
+            text = ""
+
         for num, video in enumerate(guild_instance.playlist):
             text += '**' + str(num + 1) + ")  " + '**' + video.title + "\n \n"
 

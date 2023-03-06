@@ -380,7 +380,6 @@ class GuildInstance:
                 self.voiceClient = await  voice_channel.connect()
             except discord.ClientException:
                 return
-
             leave_reason = None
             self.random = True
             while self.voiceClient.is_connected():
@@ -468,13 +467,13 @@ class GuildInstance:
         os.remove(f"../data/{self.guild_id}_animeList.json")
         await self.exit()
     async def checkListUser(self):
-        with open(f'../data/{self.guild_id}_animeList.json', 'r') as f:
-            try:
+        try:
+            with open(f'../data/{self.guild_id}_animeList.json', 'r') as f:
                 data = json.load(f)
                 await self.textChannel.send(
                     embed=discord.Embed(title=f"currently using {data['username']}'s list", color=discord.Color.green()))
-            except Exception:
-                raise Exception("Empty List. Please, Load an anilist anime list with the command ;load <username>")
+        except Exception:
+            raise Exception("Empty List. Please, Load an anilist anime list with the command ;load <username>")
 
 
 guilds = {}
