@@ -467,6 +467,15 @@ class GuildInstance:
     async def stopRandomTheme(self):
         os.remove(f"../data/{self.guild_id}_animeList.json")
         await self.exit()
+    async def checkListUser(self):
+        with open(f'../data/{self.guild_id}_animeList.json', 'r') as f:
+            try:
+                data = json.load(f)
+                await self.textChannel.send(
+                    embed=discord.Embed(title=f"currently using {data['username']}'s list", color=discord.Color.green()))
+            except Exception:
+                raise Exception("Empty List. Please, Load an anilist anime list with the command ;load <username>")
+
 
 guilds = {}
 
@@ -522,12 +531,4 @@ def convertTime(string: str) -> int:
 
     return H * 3600 + M * 60 + S
 
-def checkListUser() ->str:
-        with open('../data/animeList.json', 'r') as f:
-            try:
-                data = json.load(f)
-            except Exception:
-                raise Exception("Empty List. Please, Load an anilist anime list with the command ;load <username>")
-
-        return data['username']
 

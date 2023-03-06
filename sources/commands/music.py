@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-from sources.lib.music import getGuildInstance, checkListUser
+from sources.lib.music import getGuildInstance
 from sources.lib.decorators import userConnectedToGuildVoice, botIsConnectedToGuildVoice
 import re
 
@@ -88,6 +88,9 @@ class Music(commands.Cog):
         elif url.isnumeric():
             await guild_instance.addToPlaylistFromSearchList(int(url) - 1)
 
+        elif url is None:
+            await guild_instance.textChannel.send(
+                embed=discord.Embed(title="need a parameter", colour=discord.Color.red()))
         else:
             await guild_instance.youtubeSearch(context.message.content[5:])
             await context.message.delete()
@@ -267,12 +270,10 @@ class Music(commands.Cog):
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
         try:
-            user = checkListUser()
-            await guild_instance.textChannel.send(embed=discord.Embed(title=f"currently using {user}'s list", color=discord.Color.green()))
-            await context.message.delete()
+            await guild_instance.checkListUser()
         except Exception as e:
             await guild_instance.textChannel.send(embed=discord.Embed(title=str(e), color=discord.Color.red()))
-            await context.message.delete()
+        await context.message.delete()
 
 def setup(bot: commands.Bot):
     bot.add_cog(Music(bot))
