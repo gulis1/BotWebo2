@@ -8,7 +8,7 @@ from os import getenv
 from asyncio import sleep, get_event_loop
 from os import remove
 import yt_dlp
-from discord import ClientException, FFmpegPCMAudio
+from discord import ClientException
 from spotify import HTTPClient
 import discord
 from yt_dlp.utils import ExtractorError, DownloadError
@@ -398,10 +398,8 @@ class GuildInstance:
                             await self.playTheme()
                         except ClientException:
                             leave_reason = "Some error occurred."
-                            await self.exit()
                     else:
                         leave_reason = "random is false"
-                        await self.exit()
                 await sleep(3)
 
             if leave_reason is None:
@@ -463,8 +461,8 @@ class GuildInstance:
         # Calculate the buffer size based on the bitrate
         buffer_size = str(bitrate // 8) + 'k'
 
-        source = discord.FFmpegOpusAudio(songURL, options=f'-bufsize {buffer_size}')
-        self.voiceClient.play(source,after=lambda e: print('Player error: %s' % e) if e else None)
+        source = discord.FFmpegOpusAudio(songURL, options=f'-bufsize {buffer_size} -max_delay 500000')
+        self.voiceClient.play(source,after=None)
 
     async def stopRandomTheme(self):
         await self.exit()
