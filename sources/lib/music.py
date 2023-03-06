@@ -323,7 +323,7 @@ class GuildInstance:
         if os.path.exists("../data") == 0:
             os.mkdir("../data")
         #open file for write and delete all it has if exists and if not creates a new one
-        file = open("../data/animeList.json","w")
+        file = open(f"../data/{self.guild_id}_animeList.json","w")
 
         url = 'https://graphql.anilist.co'
 
@@ -411,7 +411,7 @@ class GuildInstance:
 
     async def playTheme(self):
         #get random anime
-        with open('../data/animeList.json', 'r') as f:
+        with open(f"../data/{self.guild_id}_animeList.json", 'r') as f:
             try:
                 data = json.load(f)
             except Exception:
@@ -465,6 +465,7 @@ class GuildInstance:
         self.voiceClient.play(source,after=None)
 
     async def stopRandomTheme(self):
+        os.remove(f"../data/{self.guild_id}_animeList.json")
         await self.exit()
 
 guilds = {}
