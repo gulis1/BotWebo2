@@ -12,6 +12,10 @@ Supports searching by name, youtube videos and playlist and spotify playlists an
 * ;empty                       Removes all songs from the playlist.
 * ;remove number               Removes specific song from the playlist.
 * ;shuffle                     Shuffles the playlist.
+* ;rload <username>            Loads complete anime list from anilist username 
+* ;rplay                       Plays random songs of the anime list loeaded
+* ;rstop                       Stops random theme playing
+* ;ruser                       Show list owner username
 
 ### Danbooru commands
 

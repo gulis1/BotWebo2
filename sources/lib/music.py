@@ -1,4 +1,7 @@
+import json
 import os
+import random
+import subprocess
 from random import shuffle
 from time import time
 from os import getenv
@@ -9,10 +12,7 @@ from discord import ClientException
 from spotify import HTTPClient
 import discord
 from yt_dlp.utils import ExtractorError, DownloadError
-
-from sources.lib.myRequests import getJsonResponse
-
-from os import mkdir
+from sources.lib.myRequests import getJsonResponse, postJson
 
 yt_key = getenv("YT_KEY")
 spotifyClientId = getenv("SPOTIFY_ID")
@@ -22,7 +22,6 @@ spotifyClient = HTTPClient(spotifyClientId, spotifySecretId)
 
 MAX_SONGS = 30
 MAX_VIDEO_DURATION = 900
-
 COLOR_RED = discord.Color.red()
 COLOR_GREEN = discord.Color.green()
 
@@ -50,6 +49,10 @@ class GuildInstance:
         self.loop: int = 0
         self.currentSong: Video or None = None
         self.data = {"playlist_id": "", "nextPageToken": ""}
+        self.random = False
+        self.randomSong = ""
+        self.randomSongSlug = ""
+        self.randomSongImage = ""
 
     def emptyPlaylist(self):
 
@@ -68,6 +71,7 @@ class GuildInstance:
         self.loop = 0
         self.emptyPlaylist()
         self.currentSong = None
+        self.random = False
 
         if self.voiceClient.is_connected:
             await self.voiceClient.disconnect(force=True)
@@ -218,7 +222,6 @@ class GuildInstance:
                         await self.playSong()
                     except ClientException:
                         leave_reason = "Some error occurred."
-                        print("HOLA")
                         await self.exit()
 
                 elif self.data["nextPageToken"] != "":
@@ -316,29 +319,153 @@ class GuildInstance:
                 embed=discord.Embed(title="Index out of range", color=COLOR_RED))
 
     async def getAnilistData(self, username: str) -> None:
+        #creates directory if not exists
         if os.path.exists("../data") == 0:
             os.mkdir("../data")
-
+        #open file for write and delete all it has if exists and if not creates a new one
         file = open("../data/animeList.json","w")
 
         url = 'https://graphql.anilist.co'
-        songURL = 'https://api.animethemes.moe/search?q=$name&include[anime]=animethemes.animethemeentries.videos.audio'
-        query = '''
-        query UserMediaListQuery ($username: String, $page: Int, $status: MediaListStatus=COMPLETED) {
-          Page (page: $page, perPage: 50) {
 
-            mediaList (userName: $username, status: $status, type: ANIME, sort: MEDIA_TITLE_ROMAJI) {
-              media {
+        query = ''' 
+            query UserMediaListQuery ($username: String, $page: Int, $status: MediaListStatus) {
+                Page (page: $page, perPage: 50) {
+                    mediaList (userName: $username, status: $status, type: ANIME, sort: MEDIA_TITLE_ROMAJI) {
+                        media {
+                            title {
+                                userPreferred
+                            }
+                        }
+  	                }
+                }
+            }
+        '''
+        variables = {
+            'username': username,
+            'page': 1,
+            'status': 'COMPLETED'
+        }
+        animelist = []
+        exit = False
+        count = 0
+        #importing animes that the user completed to a json file
+        while not exit:
+            response = await postJson(url, query=query, variables=variables)
+
+            if response is None or response['status'] == 404:
+                raise Exception("something went wrong")
+            elif response['status'] == 500:
+                raise Exception("user not found")
+
+            x = response['content']['data']['Page']['mediaList']
+            if len(x)!=0:
+                for anime in x:
+                    animelist.append(anime['media']['title']['userPreferred'])
+                    count += 1
+            else:
+                exit = True
+
+            variables['page'] += 1
+
+        list2 = {
+            'username': username,
+            'n': count,
+            'animes': animelist
+        }
+
+        file.write(json.dumps(list2))
+
+    async def randomThemePlayer(self,voice_channel: discord.VoiceChannel) -> None:
+            try:
+                self.voiceClient = await  voice_channel.connect()
+            except discord.ClientException:
+                return
+
+            leave_reason = None
+            self.random = True
+            while self.voiceClient.is_connected():
+
+                if len(self.voiceClient.channel.members) == 1:
+                    leave_reason = "Channel is empty."
+                    await self.exit()
+
+
+
+                elif not self.voiceClient.is_playing():
+
+                    if self.random == True:
+                        try:
+                            await self.playTheme()
+                        except ClientException:
+                            leave_reason = "Some error occurred."
+                    else:
+                        leave_reason = "random is false"
+                await sleep(3)
+
+            if leave_reason is None:
+                leave_reason = "I was kicked :("
+                await self.exit()
+            await self.textChannel.send(
+                embed=discord.Embed(title=f"Leaving the channel: {leave_reason}", colour=discord.Color.green()))
+
+
+    async def playTheme(self):
+        #get random anime
+        with open('../data/animeList.json', 'r') as f:
+            try:
+                data = json.load(f)
+            except Exception:
+                raise Exception("Empty List. Please, Load an anilist anime list with the command ;load <username>")
+        while True:
+            rng = random.randint(0, data['n'] - 1)
+            anime = data['animes'][rng]
+            self.randomSong = anime
+            name = anime.replace(" ", "-")
+            response = await getJsonResponse(
+                f"https://api.animethemes.moe/search?q={name}&include[anime]=animethemes.animethemeentries.videos.audio")
+            if len(response['search']['anime']) != 0:
+                break;
+
+        #get anime image
+        url = 'https://graphql.anilist.co'
+        query = '''
+        query songImage($userPreferred: String, $type: MediaType) {
+            Media (search : $userPreferred, type: $type) {
                 title {
                   userPreferred
                 }
-              }
+                coverImage {
+                  extraLarge
+                }
             }
-          }
         }
         '''
+        variables = {
+            'userPreferred': name,
+            'type': 'ANIME'
+        }
+        image = await postJson(url, query=query, variables=variables)
+        self.randomSongImage = image['content']['data']['Media']['coverImage']['extraLarge']
 
+        #play
+        themes = response['search']['anime'][0]['animethemes']
+        rng = random.randint(0, len(themes) - 1)
+        self.randomSongSlug = themes[rng]['slug']
+        songURL = themes[rng]['animethemeentries'][0]['videos'][0]['audio']['link']
 
+        # Get the bitrate of the audio file
+        ffprobe_command = ['ffprobe', '-i', songURL, '-show_entries', 'format=bit_rate', '-v', 'quiet', '-of', 'csv=p=0']
+        output = subprocess.check_output(ffprobe_command)
+        bitrate = int(output)
+
+        # Calculate the buffer size based on the bitrate
+        buffer_size = str(bitrate // 8) + 'k'
+
+        source = discord.FFmpegOpusAudio(songURL, options=f'-bufsize {buffer_size} -max_delay 500000')
+        self.voiceClient.play(source,after=None)
+
+    async def stopRandomTheme(self):
+        await self.exit()
 
 guilds = {}
 
@@ -393,4 +520,13 @@ def convertTime(string: str) -> int:
             n = ""
 
     return H * 3600 + M * 60 + S
+
+def checkListUser() ->str:
+        with open('../data/animeList.json', 'r') as f:
+            try:
+                data = json.load(f)
+            except Exception:
+                raise Exception("Empty List. Please, Load an anilist anime list with the command ;load <username>")
+
+        return data['username']
 
