@@ -227,7 +227,6 @@ class Music(commands.Cog):
         await context.message.delete()
 
     @commands.guild_only()
-    @commands.check(userConnectedToGuildVoice)
     @commands.command()
     async def rload(self, context, username=None):
 
@@ -259,6 +258,7 @@ class Music(commands.Cog):
             await guild_instance.randomThemePlayer(context.message.author.voice.channel)
         except Exception as e:
             await guild_instance.textChannel.send(embed=discord.Embed(title=str(e), color=discord.Color.red()))
+            await guild_instance.exit()
             await context.message.delete()
 
     @commands.guild_only()

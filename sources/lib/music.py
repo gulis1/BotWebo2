@@ -410,11 +410,11 @@ class GuildInstance:
 
     async def playTheme(self):
         #get random anime
-        with open(f"../data/{self.guild_id}_animeList.json", 'r') as f:
-            try:
-                data = json.load(f)
-            except Exception:
-                raise Exception("Empty List. Please, Load an anilist anime list with the command ;load <username>")
+        try:
+            with open(f"../data/{self.guild_id}_animeList.json", 'r') as f:
+                    data = json.load(f)
+        except json.decoder.JSONDecodeError:
+            raise Exception("Empty List. Please, Load an anilist anime list with the command ;load <username>")
         while True:
             rng = random.randint(0, data['n'] - 1)
             anime = data['animes'][rng]
@@ -470,7 +470,7 @@ class GuildInstance:
                 data = json.load(f)
                 await self.textChannel.send(
                     embed=discord.Embed(title=f"currently using {data['username']}'s list", color=discord.Color.green()))
-        except Exception:
+        except json.decoder.JSONDecodeError:
             raise Exception("Empty List. Please, Load an anilist anime list with the command ;load <username>")
 
 
