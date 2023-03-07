@@ -267,10 +267,7 @@ class Music(commands.Cog):
 
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
-        try:
-            await guild_instance.checkListUser()
-        except Exception as e:
-            await guild_instance.textChannel.send(embed=discord.Embed(title=str(e), color=discord.Color.red()))
+        await guild_instance.checkListUser()
         await context.message.delete()
 
 def setup(bot: commands.Bot):

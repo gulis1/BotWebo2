@@ -390,7 +390,7 @@ class GuildInstance:
                 return
             leave_reason = None
             self.random = True
-            while self.voiceClient.is_connected() and leave_reason is None:
+            while self.voiceClient.is_connected():
 
                 if len(self.voiceClient.channel.members) == 1:
                     leave_reason = "Channel is empty."
@@ -407,6 +407,8 @@ class GuildInstance:
                     else:
                         leave_reason = "random is false"
                 await sleep(3)
+                if leave_reason is not None:
+                    break;
 
             if leave_reason is None:
                 leave_reason = "I was kicked :("
@@ -464,9 +466,10 @@ class GuildInstance:
         bitrate = int(output)
 
         # Calculate the buffer size based on the bitrate
-        buffer_size = str(bitrate * 64 // 8) + 'k'
+        buffer_size = str(bitrate * 32 // 8) + 'k'
         source = discord.FFmpegOpusAudio(songURL, options=f'-bufsize {buffer_size} -max_delay 500000')
         self.voiceClient.play(source,after=None)
+
 
     async def stopRandomTheme(self):
         os.remove(f"../data/{self.guild_id}_animeList.json")
@@ -477,8 +480,9 @@ class GuildInstance:
                 data = json.load(f)
                 await self.textChannel.send(
                     embed=discord.Embed(title=f"currently using {data['username']}'s list", color=discord.Color.green()))
-        except json.decoder.JSONDecodeError:
-            raise Exception("Empty List. Please, Load an anilist anime list with the command ;load <username>")
+        except (json.decoder.JSONDecodeError, FileNotFoundError,TypeError, KeyError):
+            await self.textChannel.send(
+                embed=discord.Embed(title="List not found or List empty.", colour=discord.Color.red()))
 
 
 guilds = {}
