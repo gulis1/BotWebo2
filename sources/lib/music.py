@@ -464,7 +464,7 @@ class GuildInstance:
         bitrate = int(output)
 
         # Calculate the buffer size based on the bitrate
-        buffer_size = str(bitrate * 32 // 8) + 'k'
+        buffer_size = str(bitrate * 64 // 8) + 'k'
         source = discord.FFmpegOpusAudio(songURL, options=f'-bufsize {buffer_size} -max_delay 500000')
         self.voiceClient.play(source,after=None)
 
