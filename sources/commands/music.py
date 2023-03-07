@@ -234,18 +234,12 @@ class Music(commands.Cog):
         guild_instance.textChannel = context.message.channel
 
         if username is not None:
-            try:
-                await guild_instance.getAnilistData(username)
-            except Exception as e:
-                await guild_instance.textChannel.send(embed=discord.Embed(title=str(e),color=discord.Color.red()))
-                await context.message.delete()
-                return
+            await guild_instance.getAnilistData(username)
         else:
             await guild_instance.textChannel.send(
                 embed=discord.Embed(title="needs AniList username: ;rload [username].", color=discord.Color.red()))
             await context.message.delete()
             return
-        await guild_instance.textChannel.send(embed=discord.Embed(title=f"{username}'s list loaded", color=discord.Color.green()))
         await context.message.delete()
 
     @commands.guild_only()
@@ -254,12 +248,7 @@ class Music(commands.Cog):
     async def rplay(self,context):
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
-        try:
-            await guild_instance.randomThemePlayer(context.message.author.voice.channel)
-        except Exception as e:
-            await guild_instance.textChannel.send(embed=discord.Embed(title=str(e), color=discord.Color.red()))
-            await guild_instance.exit()
-            await context.message.delete()
+        await guild_instance.randomThemePlayer(context.message.author.voice.channel)
 
     @commands.guild_only()
     @commands.check(userConnectedToGuildVoice)

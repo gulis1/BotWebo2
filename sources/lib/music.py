@@ -352,10 +352,16 @@ class GuildInstance:
         while not exit:
             response = await postJson(url, query=query, variables=variables)
 
+            message = None
             if response is None or response['status'] == 404:
-                raise Exception("something went wrong")
+                message = "Cannot load the list, something went wrong"
             elif response['status'] == 500:
-                raise Exception("user not found")
+                message = "user not found"
+
+            if message is not None:
+                await self.textChannel.send(
+                    embed=discord.Embed(title=message, colour=discord.Color.red()))
+                return
 
             x = response['content']['data']['Page']['mediaList']
             if len(x)!=0:
@@ -374,6 +380,8 @@ class GuildInstance:
         }
 
         file.write(json.dumps(list2))
+        await self.textChannel.send(
+            embed=discord.Embed(title=f"{username}'s list loaded", color=discord.Color.green()))
 
     async def randomThemePlayer(self,voice_channel: discord.VoiceChannel) -> None:
             try:
@@ -382,20 +390,19 @@ class GuildInstance:
                 return
             leave_reason = None
             self.random = True
-            while self.voiceClient.is_connected():
+            while self.voiceClient.is_connected() and leave_reason is None:
 
                 if len(self.voiceClient.channel.members) == 1:
                     leave_reason = "Channel is empty."
-                    await self.exit()
-
-
 
                 elif not self.voiceClient.is_playing():
 
                     if self.random == True:
                         try:
                             await self.playTheme()
-                        except ClientException:
+                        except (json.decoder.JSONDecodeError, FileNotFoundError):
+                            leave_reason = "List Empty."
+                        except (ClientException,TypeError,KeyError):
                             leave_reason = "Some error occurred."
                     else:
                         leave_reason = "random is false"
@@ -403,18 +410,16 @@ class GuildInstance:
 
             if leave_reason is None:
                 leave_reason = "I was kicked :("
-                await self.exit()
+
+            await self.exit()
             await self.textChannel.send(
                 embed=discord.Embed(title=f"Leaving the channel: {leave_reason}", colour=discord.Color.green()))
 
 
     async def playTheme(self):
         #get random anime
-        try:
-            with open(f"../data/{self.guild_id}_animeList.json", 'r') as f:
-                    data = json.load(f)
-        except json.decoder.JSONDecodeError:
-            raise Exception("Empty List. Please, Load an anilist anime list with the command ;load <username>")
+        with open(f"../data/{self.guild_id}_animeList.json", 'r') as f:
+            data = json.load(f)
         while True:
             rng = random.randint(0, data['n'] - 1)
             anime = data['animes'][rng]
@@ -424,6 +429,7 @@ class GuildInstance:
                 f"https://api.animethemes.moe/search?q={name}&include[anime]=animethemes.animethemeentries.videos.audio")
             if len(response['search']['anime']) != 0:
                 break;
+
 
         #get anime image
         url = 'https://graphql.anilist.co'
@@ -444,7 +450,8 @@ class GuildInstance:
             'type': 'ANIME'
         }
         image = await postJson(url, query=query, variables=variables)
-        self.randomSongImage = image['content']['data']['Media']['coverImage']['extraLarge']
+        if image is not None:
+            self.randomSongImage = image['content']['data']['Media']['coverImage']['extraLarge']
 
         #play
         themes = response['search']['anime'][0]['animethemes']
