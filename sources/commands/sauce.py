@@ -4,11 +4,14 @@ from sources.lib.sauces import getSauce
 
 class Sauce(commands.Cog):
 
+    """ Gets the img source. """
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.command()
     async def sauce(self, context):
+        """ Call the function from the lib/sauces.py """
         message = context.message
 
         if len(message.attachments) == 0:
