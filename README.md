@@ -18,6 +18,7 @@ Shows information about the commands supported by the bot.
 
 [See more...](sources/commands/misc.py)
 
+
 <h3 id="music"> Music commands </h3>
 Supports searching by name, YouTube videos and playlist, and Spotify albums and playlists.
 
@@ -29,6 +30,11 @@ Supports searching by name, YouTube videos and playlist, and Spotify albums and 
 * [**empty**](sources/commands/music.py)                       _Removes all songs from the playlist._
 * [**remove** number](sources/commands/music.py)               _Removes specific song from the playlist._
 * [**shuffle**](sources/commands/music.py)                     _Shuffles the playlist._
+* [**rload** <username>](sources/commands/music.py)            _Loads completed anime list from anilist username._
+* [**rplay**](sources/commands/music.py)                       _Plays random songs from the anime list loaded._
+* [**rstop**](sources/commands/music.py)                       _Stop playing random theme._
+* [**ruser**](sources/commands/music.py)                       _Shows current list owner._
+
 <br>
 [See more...](sources/lib/music.py)
 

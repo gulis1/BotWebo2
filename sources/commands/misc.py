@@ -42,6 +42,10 @@ class Misc(commands.Cog):
                 **•  skip (ind)** _Skips the current song or advance to the index_
                 **•  leave** _Force the Bot to leave the channel
                 **•  remove** _Removes the current song from the playlist_
+                **•  rload** _Loads completed anime list from anilist username_
+                **•  rplay** _Plays random songs from the anime list loaded_
+                **•  rstop** _Stop playing random theme_
+                **•  ruser** _Shows current list owner_
            """
 
         elif part == "danbooru":
