@@ -2,26 +2,31 @@ import discord
 from .myRequests import getJsonResponse
 
 
-async def sendDanbooruIm(tag: str) -> discord.Embed:
+async def send_danbooru_image(tag: str) -> discord.Embed:
+    """ Sends an image from "danbooru.donmai.us" on an embed Discord message. """
+
+    # Search whether the tag set by parameter exists
     tag_list = await getJsonResponse("https://danbooru.donmai.us/tags.json?search[name_or_alias_matches]=" + tag)
 
     embed = discord.Embed(colour=discord.Color.blue())
 
-    if len(tag_list) != 0:
-        image_url = await getRandomImage(tag)
-        embed.set_image(url=image_url)
+    if len(tag_list) == 0 or tag_list[0]["post_count"] == 0:
+        embed.title = "Maybe you meant:"
+        embed.description = await get_similar_tags(tag)
 
     else:
-        embed.title = "Tag list:"
-        embed.description = await getTagList(tag)
+        image_url = await get_random_image(tag)
+        embed.set_image(url=image_url)
 
     return embed
 
 
-# Gets a random image from danbooru
-async def getRandomImage(tag: str) -> str:
+async def get_random_image(tag: str) -> str:
+    """ Gets a random image. """
+
     image_url = None
     while image_url is None:
+
         post = await getJsonResponse("https://danbooru.donmai.us/posts/random.json?tags=" + tag)
         if "file_url" in post.keys():
             image_url = post["file_url"]
@@ -29,8 +34,13 @@ async def getRandomImage(tag: str) -> str:
     return image_url
 
 
-async def getTagList(tag: str) -> str:
-    tag_list = await getJsonResponse("https://danbooru.donmai.us/tags.json?search[order]=count&search["
-                                     "name_or_alias_matches]=" + tag + "*")
+async def get_similar_tags(tag: str) -> str:
+    """ Gets a list of tags that are similar to the provided one."""
 
-    return "".join(["  - " + elem["name"] + "\n" for elem in tag_list])
+    tag_list = await getJsonResponse("https://danbooru.donmai.us/tags.json"
+                                     "?limit=5"
+                                     "&search[hide_empty]=true"
+                                     "&search[order]=count"
+                                     "&search[fuzzy_name_matches]=" + tag)
+
+    return "".join(["• " + elem["name"] + "\n" for elem in tag_list])

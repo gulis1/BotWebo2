@@ -3,6 +3,9 @@ from sources.lib.music import getGuildInstance
 
 
 async def userConnectedToGuildVoice(context):
+
+    """ Checks if the bot caller is connected. """
+
     server_id = context.message.guild.id
 
     if context.message.author.voice is not None and context.message.author.voice.channel.guild.id == server_id:
@@ -15,6 +18,9 @@ async def userConnectedToGuildVoice(context):
 
 
 async def botIsConnectedToGuildVoice(context):
+
+    """ Checks if the bot is connected to the guild voice. """
+
     server_id = context.message.guild.id
     guild_instance = getGuildInstance(server_id, create_if_missing=False)
 

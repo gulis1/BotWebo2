@@ -11,6 +11,11 @@ class AniList(commands.Cog):
     @commands.command()
     async def anime(self, context, *args):
 
+        """ Usage
+            --------
+                [COMMAND_PREFIX]anime [ANIME_NAME]
+        """
+
         if len(args) == 0:
             embed = discord.Embed(title="An anime is required.", colour=discord.Colour.red())
 
