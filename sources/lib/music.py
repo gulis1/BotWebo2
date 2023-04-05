@@ -244,10 +244,8 @@ class GuildInstance:
     async def player(self, voice_channel: discord.VoiceChannel) -> None:
 
         """ Is who takes care of the programme checks regarding the music.   """
-
         try:
-            self.voiceClient = await voice_channel.connect()
-
+            self.voiceClient = await  voice_channel.connect()
         except discord.ClientException:
             return
 
@@ -483,7 +481,6 @@ class GuildInstance:
             if len(response['search']['anime']) != 0:
                 break;
 
-
         #get anime image
         url = 'https://graphql.anilist.co'
         query = '''
@@ -505,7 +502,6 @@ class GuildInstance:
         image = await postJson(url, query=query, variables=variables)
         if image is not None:
             self.randomSongImage = image['content']['data']['Media']['coverImage']['extraLarge']
-
         #play
         themes = response['search']['anime'][0]['animethemes']
         rng = random.randint(0, len(themes) - 1)
@@ -515,7 +511,6 @@ class GuildInstance:
         ffprobe_command = ['ffprobe', '-i', songURL, '-show_entries', 'format=bit_rate', '-v', 'quiet', '-of', 'csv=p=0']
         output = subprocess.check_output(ffprobe_command)
         bitrate = int(output)
-
         # Calculate the buffer size based on the bitrate
         buffer_size = str(bitrate * 32 // 8) + 'k'
         source = discord.FFmpegOpusAudio(songURL, options=f'-bufsize {buffer_size} -max_delay 500000')

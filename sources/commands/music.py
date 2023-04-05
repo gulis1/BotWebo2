@@ -63,11 +63,9 @@ class Music(commands.Cog):
     @commands.command()
     async def play(self, context, url):
         """ Plays the song sent. """
-
         # Gets the guild where the bot is called
         guild_instance = getGuildInstance(context.message.guild.id)
         guild_instance.textChannel = context.message.channel
-
         # make impossible playing youtube videos when playing random theme is on
         
         if guild_instance.random == True:
@@ -76,7 +74,6 @@ class Music(commands.Cog):
             return
 
         # If the song is an url
-        
         if url.startswith("http"):
             yt_playlist = re.search("(youtube.com|youtu.be)(\/playlist\?list=)([a-zA-Z0-9\-\_]+)", url)
             yt_video = re.search("(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*)", url)
@@ -290,5 +287,5 @@ class Music(commands.Cog):
         await guild_instance.checkListUser()
         await context.message.delete()
 
-def setup(bot: commands.Bot):
-    bot.add_cog(Music(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Music(bot))

@@ -1,4 +1,6 @@
 #!/usr/bin/python3 -u
+import asyncio
+
 from discord.ext import commands
 from discord import Intents
 from dotenv import load_dotenv, find_dotenv
@@ -6,8 +8,9 @@ from os import getenv
 
 intents = Intents.default()
 intents.members = True
-COMMAND_PREFIX = ";" # The COMMAND_PREFIX
-bot = commands.Bot(COMMAND_PREFIX, intents=intents)
+intents.message_content = True
+COMMAND_PREFIX = "!" # The COMMAND_PREFIX
+bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=intents)
 
 
 @bot.event
@@ -18,16 +21,17 @@ async def on_ready():
     print('Ready')
 
 
-def main():
+async def main():
 
     """ main method """
 
     load_dotenv(find_dotenv())
     discord_token = getenv("DISCORD_TOKEN") # takes the TOKEN from the DISCORD_TOKEN on env.example
 
-    bot.load_extension("sources.commands")
-    bot.run(discord_token)
+    await bot.load_extension("sources.commands")
+    await bot.start(discord_token)
+
 
 
 if __name__ == "__main__":
-    main()
+   asyncio.run(main())
