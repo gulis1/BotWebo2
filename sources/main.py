@@ -9,7 +9,7 @@ from os import getenv
 intents = Intents.default()
 intents.members = True
 intents.message_content = True
-COMMAND_PREFIX = "!" # The COMMAND_PREFIX
+COMMAND_PREFIX = ";" # The COMMAND_PREFIX
 bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=intents)
 
 
