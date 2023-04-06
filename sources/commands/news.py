@@ -62,5 +62,5 @@ class News(commands.Cog):
         await self.bot.wait_until_ready()
 
 
-def setup(bot: commands.Bot):
-    bot.add_cog(News(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(News(bot))

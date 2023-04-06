@@ -90,5 +90,5 @@ class Misc(commands.Cog):
         await context.send(embed=discord.Embed(title=("Help " + part + ":") , description=text, colour=discord.Color.green()))
 
 
-def setup(bot):
-    bot.add_cog(Misc(bot))
+async def setup(bot):
+    await bot.add_cog(Misc(bot))

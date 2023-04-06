@@ -27,5 +27,5 @@ class AniList(commands.Cog):
         await context.message.delete()
 
 
-def setup(bot: commands.Bot):
-    bot.add_cog(AniList(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(AniList(bot))
