@@ -5,7 +5,7 @@
 * [music commands](#music)
 * [danbooru commands](#danbooru)
 * [sauce commands](#sauce)
-* [anilits commands](#anilist)
+* [anilist commands](#anilist)
 ---
 ## Features
 * [anime/manga news](#news)
